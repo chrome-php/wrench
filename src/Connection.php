@@ -336,11 +336,11 @@ class Connection extends Configurable implements LoggerAwareInterface
      */
     public function onData($data)
     {
-        if (!$this->handshaked) {
-            return $this->handshake($data);
+        if ($this->handshaked) {
+            $this->handle($data);
+        } else {
+            $this->handshake($data);
         }
-
-        $this->handle($data);
     }
 
     /**
