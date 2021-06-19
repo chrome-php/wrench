@@ -334,7 +334,7 @@ class Connection extends Configurable implements LoggerAwareInterface
      *
      * @param string $data
      */
-    public function onData($data)
+    public function onData($data): void
     {
         if ($this->handshaked) {
             $this->handle($data);
