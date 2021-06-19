@@ -17,6 +17,6 @@ class ServerClientSocket extends Socket
         parent::__construct($options);
 
         $this->socket = $accepted_socket;
-        $this->connected = (boolean)$accepted_socket;
+        $this->connected = (bool) $accepted_socket;
     }
 }

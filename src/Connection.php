@@ -22,7 +22,7 @@ use Wrench\Socket\ServerClientSocket;
 use Wrench\Util\Configurable;
 
 /**
- * Represents a client connection on the server side
+ * Represents a client connection on the server side.
  *
  * i.e. the `Server` manages a bunch of `Connection`s
  */
@@ -31,14 +31,14 @@ class Connection extends Configurable implements LoggerAwareInterface
     use LoggerAwareTrait;
 
     /**
-     * The connection manager
+     * The connection manager.
      *
      * @var ConnectionManager
      */
     protected $manager;
 
     /**
-     * Socket object
+     * Socket object.
      *
      * Wraps the client connection resource
      *
@@ -47,28 +47,28 @@ class Connection extends Configurable implements LoggerAwareInterface
     protected $socket;
 
     /**
-     * Whether the connection has successfully handshaken
+     * Whether the connection has successfully handshaken.
      *
-     * @var boolean
+     * @var bool
      */
     protected $handshaked = false;
 
     /**
-     * The application this connection belongs to
+     * The application this connection belongs to.
      *
      * @var DataHandlerInterface|ConnectionHandlerInterface|UpdateHandlerInterface
      */
     protected $application = null;
 
     /**
-     * The IP address of the client
+     * The IP address of the client.
      *
      * @var string
      */
     protected $ip;
 
     /**
-     * The port of the client
+     * The port of the client.
      *
      * @var int
      */
@@ -76,7 +76,7 @@ class Connection extends Configurable implements LoggerAwareInterface
 
     /**
      * The array of headers included with the original request (like Cookie for example)
-     * The headers specific to the web sockets handshaking have been stripped out
+     * The headers specific to the web sockets handshaking have been stripped out.
      *
      * @var array
      */
@@ -84,14 +84,14 @@ class Connection extends Configurable implements LoggerAwareInterface
 
     /**
      * The array of query parameters included in the original request
-     * The array is in the format 'key' => 'value'
+     * The array is in the format 'key' => 'value'.
      *
      * @var array
      */
     protected $queryParams = null;
 
     /**
-     * Connection ID
+     * Connection ID.
      *
      * @var string|null
      */
@@ -103,7 +103,7 @@ class Connection extends Configurable implements LoggerAwareInterface
     protected $payloadHandler;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param ConnectionManager  $manager
      * @param ServerClientSocket $socket
@@ -135,7 +135,7 @@ class Connection extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Configures the client ID
+     * Configures the client ID.
      *
      * We hash the client ID to prevent leakage of information if another client
      * happens to get a hold of an ID. The secret *must* be lengthy, and must
@@ -144,7 +144,7 @@ class Connection extends Configurable implements LoggerAwareInterface
      */
     protected function generateClientId(): void
     {
-        $this->id = bin2hex(random_bytes(32));
+        $this->id = \bin2hex(\random_bytes(32));
     }
 
     protected function configurePayloadHandler(): void
@@ -156,7 +156,7 @@ class Connection extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Gets the connection manager of this connection
+     * Gets the connection manager of this connection.
      *
      * @return \Wrench\ConnectionManager
      */
@@ -166,29 +166,31 @@ class Connection extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Handle a complete payload received from the client
+     * Handle a complete payload received from the client.
      *
      * Public because called from our PayloadHandler
      *
      * @param Payload $payload
+     *
      * @throws ConnectionException
      */
     public function handlePayload(Payload $payload): void
     {
         $app = $this->getClientApplication();
 
-        $this->logger->debug('Handling payload: ' . $payload->getPayload());
+        $this->logger->debug('Handling payload: '.$payload->getPayload());
 
         switch ($type = $payload->getType()) {
             case Protocol::TYPE_TEXT:
-                if (method_exists($app, 'onData')) {
-                    $app->onData((string)$payload, $this);
+                if (\method_exists($app, 'onData')) {
+                    $app->onData((string) $payload, $this);
                 }
+
                 return;
 
             case Protocol::TYPE_BINARY:
-                if (method_exists($app, 'onBinaryData')) {
-                    $app->onBinaryData((string)$payload, $this);
+                if (\method_exists($app, 'onBinaryData')) {
+                    $app->onBinaryData((string) $payload, $this);
                 } else {
                     $this->close(1003);
                 }
@@ -221,7 +223,7 @@ class Connection extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Gets the client application
+     * Gets the client application.
      *
      * @return DataHandlerInterface|ConnectionHandlerInterface|UpdateHandlerInterface
      */
@@ -231,7 +233,7 @@ class Connection extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Closes the connection according to the WebSocket protocol
+     * Closes the connection according to the WebSocket protocol.
      *
      * If an endpoint receives a Close frame and that endpoint did not
      * previously send a Close frame, the endpoint MUST send a Close frame
@@ -251,6 +253,7 @@ class Connection extends Configurable implements LoggerAwareInterface
      *
      * @param int    $code
      * @param string $reason The human readable reason the connection was closed
+     *
      * @return bool
      */
     public function close(int $code = Protocol::CLOSE_NORMAL, string $reason = null): bool
@@ -267,7 +270,7 @@ class Connection extends Configurable implements LoggerAwareInterface
             $this->logger->warning('Unable to send close message');
         }
 
-        if ($this->application && method_exists($this->application, 'onDisconnect')) {
+        if ($this->application && \method_exists($this->application, 'onDisconnect')) {
             $this->application->onDisconnect($this);
         }
 
@@ -278,10 +281,11 @@ class Connection extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Sends the payload to the connection
+     * Sends the payload to the connection.
      *
      * @param string|Payload|mixed $data
      * @param int                  $type
+     *
      * @return bool
      */
     public function send(string $data, int $type = Protocol::TYPE_TEXT): bool
@@ -291,8 +295,8 @@ class Connection extends Configurable implements LoggerAwareInterface
         }
 
         $payload = $this->protocol->getPayload();
-        if (!is_scalar($data) && !$data instanceof Payload) {
-            $data = json_encode($data);
+        if (!\is_scalar($data) && !$data instanceof Payload) {
+            $data = \json_encode($data);
         }
 
         // Servers don't send masked payloads
@@ -300,31 +304,31 @@ class Connection extends Configurable implements LoggerAwareInterface
 
         if (!$payload->sendToSocket($this->socket)) {
             $this->logger->warning('Could not send payload to client');
-            throw new ConnectionException('Could not send data to connection: ' . $this->socket->getLastError());
+            throw new ConnectionException('Could not send data to connection: '.$this->socket->getLastError());
         }
 
         return true;
     }
 
     /**
-     * Processes data on the socket
+     * Processes data on the socket.
      *
      * @throws CloseException
      */
-    public function process()
+    public function process(): void
     {
         $data = $this->socket->receive();
-        $bytes = strlen($data);
+        $bytes = \strlen($data);
 
-        if ($bytes === 0 || $data === false) {
-            throw new CloseException('Error reading data from socket: ' . $this->socket->getLastError());
+        if (0 === $bytes || false === $data) {
+            throw new CloseException('Error reading data from socket: '.$this->socket->getLastError());
         }
 
         $this->onData($data);
     }
 
     /**
-     * Data receiver
+     * Data receiver.
      *
      * Called by the connection manager when the connection has received data
      *
@@ -340,14 +344,15 @@ class Connection extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Performs a websocket handshake
+     * Performs a websocket handshake.
      *
      * @param string $data
+     *
      * @throws BadRequestException
      * @throws HandshakeException
      * @throws WrenchException
      */
-    public function handshake($data)
+    public function handshake($data): void
     {
         try {
             list($path, $origin, $key, $extensions, $protocol, $headers, $params)
@@ -372,13 +377,13 @@ class Connection extends Configurable implements LoggerAwareInterface
                 throw new HandshakeException('Socket is not connected');
             }
 
-            if ($this->socket->send($response) === null) {
+            if (null === $this->socket->send($response)) {
                 throw new HandshakeException('Could not send handshake response');
             }
 
             $this->handshaked = true;
 
-            $this->logger->info(sprintf(
+            $this->logger->info(\sprintf(
                 'Handshake successful: %s:%d (%s) connected to %s',
                 $this->getIp(),
                 $this->getPort(),
@@ -391,20 +396,20 @@ class Connection extends Configurable implements LoggerAwareInterface
                 [$this]
             );
 
-            if (method_exists($this->application, 'onConnect')) {
+            if (\method_exists($this->application, 'onConnect')) {
                 $this->application->onConnect($this);
             }
         } catch (WrenchException $e) {
             $this->logger->error('Handshake failed: {exception}', [
                 'exception' => $e,
             ]);
-            $this->close(Protocol::CLOSE_PROTOCOL_ERROR, (string)$e);
+            $this->close(Protocol::CLOSE_PROTOCOL_ERROR, (string) $e);
             throw $e;
         }
     }
 
     /**
-     * Gets the IP address of the connection
+     * Gets the IP address of the connection.
      *
      * @return string Usually dotted quad notation
      */
@@ -414,7 +419,7 @@ class Connection extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Gets the port of the connection
+     * Gets the port of the connection.
      *
      * @return int
      */
@@ -424,7 +429,7 @@ class Connection extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Gets the connection ID
+     * Gets the connection ID.
      *
      * @return string
      */
@@ -434,7 +439,7 @@ class Connection extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Handle data received from the client
+     * Handle data received from the client.
      *
      * The data passed in may belong to several different frames across one or
      * more protocols. It may not even contain a single complete frame. This method
@@ -442,16 +447,18 @@ class Connection extends Configurable implements LoggerAwareInterface
      *
      * @todo An endpoint MUST be capable of handling control frames in the
      *        middle of a fragmented message.
+     *
      * @param string $data
+     *
      * @return void
      */
-    public function handle($data)
+    public function handle($data): void
     {
         $this->payloadHandler->handle($data);
     }
 
     /**
-     * Gets the non-web-sockets headers included with the original request
+     * Gets the non-web-sockets headers included with the original request.
      *
      * @return array
      */
@@ -461,7 +468,7 @@ class Connection extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Gets the query parameters included with the original request
+     * Gets the query parameters included with the original request.
      *
      * @return array
      */
@@ -471,7 +478,7 @@ class Connection extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Gets the socket object
+     * Gets the socket object.
      *
      * @return Socket\ServerClientSocket
      */
@@ -485,7 +492,7 @@ class Connection extends Configurable implements LoggerAwareInterface
      */
     protected function configure(array $options): void
     {
-        $options = array_merge([
+        $options = \array_merge([
             'connection_id_secret' => 'asu5gj656h64Da(0crt8pud%^WAYWW$u76dwb',
             'connection_id_algo' => 'sha512',
         ], $options);

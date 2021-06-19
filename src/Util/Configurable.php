@@ -7,7 +7,7 @@ use Wrench\Protocol\Protocol;
 use Wrench\Protocol\Rfc6455Protocol;
 
 /**
- * Configurable base class
+ * Configurable base class.
  */
 abstract class Configurable
 {
@@ -22,12 +22,12 @@ abstract class Configurable
     protected $protocol;
 
     /**
-     * Configurable constructor
+     * Configurable constructor.
      *
-     * @param array $options           (optional)
-     *                                 Options:
-     *                                 - protocol             => Wrench\Protocol object, latest protocol
-     *                                 version used if not specified
+     * @param array $options (optional)
+     *                       Options:
+     *                       - protocol             => Wrench\Protocol object, latest protocol
+     *                       version used if not specified
      */
     public function __construct(
         array $options = []
@@ -37,19 +37,19 @@ abstract class Configurable
     }
 
     /**
-     * Configures the options
+     * Configures the options.
      *
      * @param array $options
      */
     protected function configure(array $options): void
     {
-        $this->options = array_merge([
+        $this->options = \array_merge([
             'protocol' => new Rfc6455Protocol(),
         ], $options);
     }
 
     /**
-     * Configures the protocol option
+     * Configures the protocol option.
      *
      * @throws InvalidArgumentException
      */

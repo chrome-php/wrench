@@ -3,7 +3,6 @@
 namespace Wrench\Listener;
 
 use Wrench\Connection;
-use Wrench\Exception\InvalidOriginException;
 use Wrench\Protocol\Protocol;
 use Wrench\Server;
 
@@ -18,7 +17,7 @@ class OriginPolicy implements Listener, HandshakeRequestListener
 
     /**
      * Handshake request listener
-     * Closes the connection on handshake from an origin that isn't allowed
+     * Closes the connection on handshake from an origin that isn't allowed.
      *
      * @param Connection $connection
      * @param string     $path
@@ -39,24 +38,25 @@ class OriginPolicy implements Listener, HandshakeRequestListener
     }
 
     /**
-     * Whether the specified origin is allowed under this policy
+     * Whether the specified origin is allowed under this policy.
      *
      * @param string $origin
+     *
      * @return bool
      */
     public function isAllowed(string $origin): bool
     {
-        $scheme = parse_url($origin, PHP_URL_SCHEME);
-        $host = parse_url($origin, PHP_URL_HOST) ?: $origin;
+        $scheme = \parse_url($origin, \PHP_URL_SCHEME);
+        $host = \parse_url($origin, \PHP_URL_HOST) ?: $origin;
 
         foreach ($this->allowed as $allowed) {
-            $allowed_scheme = parse_url($allowed, PHP_URL_SCHEME);
+            $allowed_scheme = \parse_url($allowed, \PHP_URL_SCHEME);
 
             if ($allowed_scheme && $scheme != $allowed_scheme) {
                 continue;
             }
 
-            $allowed_host = parse_url($allowed, PHP_URL_HOST) ?: $allowed;
+            $allowed_host = \parse_url($allowed, \PHP_URL_HOST) ?: $allowed;
 
             if ($host != $allowed_host) {
                 continue;

@@ -10,15 +10,17 @@ class OriginPolicyTest extends ListenerBaseTest
     {
         $instance = $this->getInstance([]);
         $this->assertInstanceOfClass($instance, 'No constructor arguments');
+
         return $instance;
     }
 
     /**
      * @dataProvider getValidArguments
+     *
      * @param array  $allowed
      * @param string $domain
      */
-    public function testValidAllowed($allowed, $domain)
+    public function testValidAllowed($allowed, $domain): void
     {
         $instance = $this->getInstance($allowed);
         $this->assertTrue($instance->isAllowed($domain));
@@ -26,10 +28,11 @@ class OriginPolicyTest extends ListenerBaseTest
 
     /**
      * @dataProvider getValidArguments
+     *
      * @param array  $allowed
      * @param string $domain
      */
-    public function testValidHandshake($allowed, $domain)
+    public function testValidHandshake($allowed, $domain): void
     {
         $instance = $this->getInstance($allowed);
 
@@ -44,10 +47,11 @@ class OriginPolicyTest extends ListenerBaseTest
 
     /**
      * @dataProvider getInvalidArguments
+     *
      * @param array  $allowed
      * @param string $bad_domain
      */
-    public function testInvalidAllowed($allowed, $bad_domain)
+    public function testInvalidAllowed($allowed, $bad_domain): void
     {
         $instance = $this->getInstance($allowed);
         $this->assertFalse($instance->isAllowed($bad_domain));
@@ -55,10 +59,11 @@ class OriginPolicyTest extends ListenerBaseTest
 
     /**
      * @dataProvider getInvalidArguments
+     *
      * @param array  $allowed
      * @param string $bad_domain
      */
-    public function testInvalidHandshake($allowed, $bad_domain)
+    public function testInvalidHandshake($allowed, $bad_domain): void
     {
         $instance = $this->getInstance($allowed);
 
@@ -72,7 +77,7 @@ class OriginPolicyTest extends ListenerBaseTest
     }
 
     /**
-     * Data provider
+     * Data provider.
      */
     public function getValidArguments()
     {
@@ -84,7 +89,7 @@ class OriginPolicyTest extends ListenerBaseTest
     }
 
     /**
-     * Data provider
+     * Data provider.
      */
     public function getInvalidArguments()
     {

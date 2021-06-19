@@ -6,7 +6,7 @@ use Wrench\Frame\Frame;
 use Wrench\Frame\HybiFrame;
 
 /**
- * Gets a HyBi payload
+ * Gets a HyBi payload.
  */
 class HybiPayload extends Payload
 {

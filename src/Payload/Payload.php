@@ -17,26 +17,28 @@ use Wrench\Socket\Socket;
 abstract class Payload
 {
     /**
-     * A payload may consist of one or more frames
+     * A payload may consist of one or more frames.
      *
      * @var Frame[]
      */
     protected $frames = [];
 
     /**
-     * String representation of the payload contents
+     * String representation of the payload contents.
      *
      * @var string Binary
      */
     protected $buffer;
 
     /**
-     * Encodes a payload
+     * Encodes a payload.
      *
-     * @param string  $data
-     * @param int     $type
-     * @param boolean $masked
+     * @param string $data
+     * @param int    $type
+     * @param bool   $masked
+     *
      * @return Payload
+     *
      * @todo No splitting into multiple frames just yet
      */
     public function encode(string $data, int $type = Protocol::TYPE_TEXT, bool $masked = false)
@@ -44,7 +46,7 @@ abstract class Payload
         $this->frames = [];
 
         $frame = $this->getFrame();
-        array_push($this->frames, $frame);
+        $this->frames[] = $frame;
 
         $frame->encode($data, $type, $masked);
 
@@ -52,14 +54,14 @@ abstract class Payload
     }
 
     /**
-     * Get a frame object
+     * Get a frame object.
      *
      * @return Frame
      */
     abstract protected function getFrame();
 
     /**
-     * Whether this payload is waiting for more data
+     * Whether this payload is waiting for more data.
      *
      * @return bool
      */
@@ -94,7 +96,7 @@ abstract class Payload
     }
 
     /**
-     * Whether the payload is complete
+     * Whether the payload is complete.
      *
      * @return bool
      */
@@ -104,23 +106,26 @@ abstract class Payload
     }
 
     /**
-     * Gets the current frame for the payload
+     * Gets the current frame for the payload.
      *
      * @return mixed
      */
     protected function getCurrentFrame()
     {
         if (empty($this->frames)) {
-            array_push($this->frames, $this->getFrame());
+            $this->frames[] = $this->getFrame();
         }
-        return end($this->frames);
+
+        return \end($this->frames);
     }
 
     /**
      * @param Socket $socket
-     * @return bool
+     *
      * @throws FrameException
      * @throws SocketException
+     *
+     * @return bool
      */
     public function sendToSocket(Socket $socket): bool
     {
@@ -128,7 +133,7 @@ abstract class Payload
 
         foreach ($this->frames as $frame) {
             $success = $success && (
-                    $socket->send($frame->getFrameBuffer()) !== null
+                    null !== $socket->send($frame->getFrameBuffer())
                 );
         }
 
@@ -136,11 +141,13 @@ abstract class Payload
     }
 
     /**
-     * Receive raw data into the payload
+     * Receive raw data into the payload.
      *
      * @param string $data
-     * @return void
+     *
      * @throws PayloadException
+     *
+     * @return void
      */
     public function receiveData(string $data): void
     {
@@ -151,24 +158,25 @@ abstract class Payload
 
             $remaining = $frame->getRemainingData();
 
-            if ($remaining === null) {
+            if (null === $remaining) {
                 $chunkSize = 2;
             } elseif ($remaining > 0) {
                 $chunkSize = $remaining;
             }
 
-            $chunkSize = min(strlen($data), $chunkSize);
-            $chunk = substr($data, 0, $chunkSize);
-            $data = substr($data, $chunkSize);
+            $chunkSize = \min(\strlen($data), $chunkSize);
+            $chunk = \substr($data, 0, $chunkSize);
+            $data = \substr($data, $chunkSize);
 
             $frame->receiveData($chunk);
         }
     }
 
     /**
-     * Gets the frame into which data should be receieved
+     * Gets the frame into which data should be receieved.
      *
      * @throws PayloadException
+     *
      * @return Frame
      */
     protected function getReceivingFrame(): Frame
@@ -200,8 +208,9 @@ abstract class Payload
     }
 
     /**
-     * @return string
      * @throws FrameException
+     *
+     * @return string
      */
     public function getPayload(): string
     {
@@ -216,9 +225,10 @@ abstract class Payload
 
     /**
      * Gets the type of the payload
-     * The type of a payload is taken from its first frame
+     * The type of a payload is taken from its first frame.
      *
      * @throws PayloadException
+     *
      * @return int
      */
     public function getType(): int
@@ -226,6 +236,7 @@ abstract class Payload
         if (!isset($this->frames[0])) {
             throw new PayloadException('Cannot tell payload type yet');
         }
+
         return $this->frames[0]->getType();
     }
 }

@@ -5,7 +5,7 @@ namespace Wrench\Util;
 class Ssl
 {
     /**
-     * Generates a new PEM File given the information
+     * Generates a new PEM File given the information.
      *
      * @param string $pem_file                 the path of the PEM file to create
      * @param string $pem_passphrase           the passphrase to protect the PEM file or if you don't want to use a
@@ -40,16 +40,16 @@ class Ssl
             'emailAddress' => $email_address,
         ];
 
-        $privkey = openssl_pkey_new();
-        $cert = openssl_csr_new($dn, $privkey);
-        $cert = openssl_csr_sign($cert, null, $privkey, 365);
+        $privkey = \openssl_pkey_new();
+        $cert = \openssl_csr_new($dn, $privkey);
+        $cert = \openssl_csr_sign($cert, null, $privkey, 365);
 
         $pem = [];
 
-        openssl_x509_export($cert, $pem[0]);
-        openssl_pkey_export($privkey, $pem[1], $pem_passphrase);
+        \openssl_x509_export($cert, $pem[0]);
+        \openssl_pkey_export($privkey, $pem[1], $pem_passphrase);
 
-        $pem = implode($pem);
-        file_put_contents($pem_file, $pem);
+        $pem = \implode('', $pem);
+        \file_put_contents($pem_file, $pem);
     }
 }

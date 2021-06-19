@@ -14,8 +14,8 @@ class ServerTestHelper implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    const TEST_SERVER_PORT_MIN = 16666;
-    const TEST_SERVER_PORT_MAX = 52222;
+    public const TEST_SERVER_PORT_MIN = 16666;
+    public const TEST_SERVER_PORT_MAX = 52222;
 
     public static $nextPort = null;
 
@@ -29,7 +29,7 @@ class ServerTestHelper implements LoggerAwareInterface
     }
 
     /**
-     * Destructor
+     * Destructor.
      */
     public function __destruct()
     {
@@ -38,61 +38,61 @@ class ServerTestHelper implements LoggerAwareInterface
 
     /**
      * Tears down the server process
-     * This method *must* be called
+     * This method *must* be called.
      */
     public function tearDown(): void
     {
         if ($this->process) {
             foreach ($this->pipes as &$pipe) {
-                fclose($pipe);
+                \fclose($pipe);
             }
             $this->pipes = null;
 
             // Sigh
-            $status = proc_get_status($this->process);
+            $status = \proc_get_status($this->process);
 
             if ($status && isset($status['pid']) && $status['pid']) {
                 // More sigh, this is the pid of the parent sh process, we want
                 //  to terminate the server directly
                 $this->logger->info('Command: ps -ao pid,ppid | col | tail -n +2 | grep \'  '
-                    . $status['pid']
-                    . "'");
-                exec('ps -ao pid,ppid | col | tail -n +2 | grep \' '
-                    . $status['pid']
-                    . "'", $processes, $return);
+                    .$status['pid']
+                    ."'");
+                \exec('ps -ao pid,ppid | col | tail -n +2 | grep \' '
+                    .$status['pid']
+                    ."'", $processes, $return);
 
-                if ($return === 0) {
+                if (0 === $return) {
                     foreach ($processes as $process) {
-                        list($pid, $ppid) = explode(' ', str_replace('  ', ' ', $process));
+                        list($pid, $ppid) = \explode(' ', \str_replace('  ', ' ', $process));
                         if ($pid) {
-                            $this->logger->info('Killing ' . $pid);
-                            exec('kill ' . $pid . ' > /dev/null 2>&1');
+                            $this->logger->info('Killing '.$pid);
+                            \exec('kill '.$pid.' > /dev/null 2>&1');
                         }
                     }
                 } else {
                     $this->logger->warning('Unable to find child processes');
                 }
 
-                sleep(1);
+                \sleep(1);
 
-                $this->logger->info('Killing ' . $status['pid']);
-                exec('kill ' . $status['pid'] . ' > /dev/null 2>&1');
+                $this->logger->info('Killing '.$status['pid']);
+                \exec('kill '.$status['pid'].' > /dev/null 2>&1');
 
-                sleep(1);
+                \sleep(1);
             }
 
-            proc_close($this->process);
+            \proc_close($this->process);
             $this->process = null;
         }
     }
 
     /**
-     * Logs a message
+     * Logs a message.
      *
      * @param string $message
      * @param string $priority
      */
-    public function log($message, $priority = 'info')
+    public function log($message, $priority = 'info'): void
     {
         //echo $message . "\n";
     }
@@ -102,7 +102,7 @@ class ServerTestHelper implements LoggerAwareInterface
      */
     public function getEchoConnectionString()
     {
-        return $this->getConnectionString() . '/echo';
+        return $this->getConnectionString().'/echo';
     }
 
     /**
@@ -110,52 +110,53 @@ class ServerTestHelper implements LoggerAwareInterface
      */
     public function getConnectionString()
     {
-        return 'ws://localhost:' . $this->port;
+        return 'ws://localhost:'.$this->port;
     }
 
     /**
      * Sets up the server process and sleeps for a few seconds while
-     * it wakes up
+     * it wakes up.
      */
     public function setUp(): void
     {
         $this->port = self::getNextPort();
 
-        $directory = sprintf('%s/%s', sys_get_temp_dir(), bin2hex(random_bytes(16)));
-        mkdir($directory);
+        $directory = \sprintf('%s/%s', \sys_get_temp_dir(), \bin2hex(\random_bytes(16)));
+        \mkdir($directory);
 
-        $this->process = proc_open(
+        $this->process = \proc_open(
             $this->getCommand(),
             [
                 0 => ['file', '/dev/null', 'r'],
-                1 => ['file', $directory . '/server.log', 'a+'],
-                2 => ['file', $directory . '/server.err.log', 'a+'],
+                1 => ['file', $directory.'/server.log', 'a+'],
+                2 => ['file', $directory.'/server.err.log', 'a+'],
             ],
             $this->pipes,
-            __DIR__ . '../'
+            __DIR__.'../'
         );
 
-        sleep(3);
+        \sleep(3);
     }
 
     /**
-     * Gets the next available port number to start a server on
+     * Gets the next available port number to start a server on.
      */
     public static function getNextPort()
     {
-        if (self::$nextPort === null) {
-            self::$nextPort = mt_rand(self::TEST_SERVER_PORT_MIN, self::TEST_SERVER_PORT_MAX);
+        if (null === self::$nextPort) {
+            self::$nextPort = \mt_rand(self::TEST_SERVER_PORT_MIN, self::TEST_SERVER_PORT_MAX);
         }
+
         return self::$nextPort++;
     }
 
     /**
-     * Gets the server command
+     * Gets the server command.
      *
      * @return string
      */
     protected function getCommand()
     {
-        return sprintf('/usr/bin/env php %s/server.php %d', __DIR__, $this->port);
+        return \sprintf('/usr/bin/env php %s/server.php %d', __DIR__, $this->port);
     }
 }

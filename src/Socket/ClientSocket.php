@@ -1,27 +1,28 @@
 <?php
+
 namespace Wrench\Socket;
 
 /**
  * Options:
- *  - timeout_connect      => int, seconds, default 2
+ *  - timeout_connect      => int, seconds, default 2.
  */
 class ClientSocket extends UriSocket
 {
     /**
-     * Default connection timeout
+     * Default connection timeout.
      *
      * @var int seconds
      */
-    const TIMEOUT_CONNECT = 2;
+    public const TIMEOUT_CONNECT = 2;
 
-    public function reconnect()
+    public function reconnect(): void
     {
         $this->disconnect();
         $this->connect();
     }
 
     /**
-     * Connects to the given socket
+     * Connects to the given socket.
      */
     public function connect(): bool
     {
@@ -33,30 +34,26 @@ class ClientSocket extends UriSocket
         $errstr = null;
 
         // Supress PHP error, we're handling it
-        $this->socket = @stream_socket_client(
+        $this->socket = @\stream_socket_client(
             $this->getUri(),
             $errno,
             $errstr,
             $this->options['timeout_connect'],
-            STREAM_CLIENT_CONNECT,
+            \STREAM_CLIENT_CONNECT,
             $this->getStreamContext()
         );
 
         if (!$this->socket) {
-            throw new \Wrench\Exception\ConnectionException(sprintf(
-                'Could not connect to socket: %s (%d)',
-                $errstr,
-                $errno
-            ));
+            throw new \Wrench\Exception\ConnectionException(\sprintf('Could not connect to socket: %s (%d)', $errstr, $errno));
         }
 
-        stream_set_timeout($this->socket, $this->options['timeout_socket']);
+        \stream_set_timeout($this->socket, $this->options['timeout_socket']);
 
-        return ($this->connected = true);
+        return $this->connected = true;
     }
 
     /**
-     * Configure the client socket
+     * Configure the client socket.
      *
      * Options include:
      *
@@ -70,7 +67,7 @@ class ClientSocket extends UriSocket
      */
     protected function configure(array $options): void
     {
-        $options = array_merge([
+        $options = \array_merge([
             'timeout_connect' => self::TIMEOUT_CONNECT,
             'ssl_verify_peer' => false,
             'ssl_allow_self_signed' => true,
@@ -82,6 +79,7 @@ class ClientSocket extends UriSocket
     protected function getSocketStreamContextOptions(): array
     {
         $options = [];
+
         return $options;
     }
 

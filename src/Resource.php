@@ -3,7 +3,7 @@
 namespace Wrench;
 
 /**
- * Resource interface
+ * Resource interface.
  */
 interface Resource
 {

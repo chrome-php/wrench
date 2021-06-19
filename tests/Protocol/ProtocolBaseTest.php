@@ -19,7 +19,7 @@ abstract class ProtocolBaseTest extends BaseTest
     /**
      * @dataProvider getValidHandshakeRequests
      */
-    public function testValidatHandshakeRequestValid($request)
+    public function testValidatHandshakeRequestValid($request): void
     {
         try {
             list($path, $origin, $key, $extensions, $protocol) = $this->getInstance()->validateRequestHandshake($request);
@@ -27,7 +27,7 @@ abstract class ProtocolBaseTest extends BaseTest
             $this->assertEquals('/chat', $path);
             $this->assertEquals('http://example.com', $origin);
             $this->assertEquals('dGhlIHNhbXBsZSBub25jZQ==', $key);
-            $this->assertTrue(is_array($extensions), 'Extensions returned as array');
+            $this->assertTrue(\is_array($extensions), 'Extensions returned as array');
             $this->assertEquals(['x-test', 'x-test2'], $extensions, 'Extensions match');
             $this->assertEquals('chat, superchat', $protocol);
         } catch (Exception $e) {
@@ -38,11 +38,11 @@ abstract class ProtocolBaseTest extends BaseTest
     /**
      * @dataProvider getValidHandshakeResponses
      */
-    public function testValidateHandshakeResponseValid($response, $key)
+    public function testValidateHandshakeResponseValid($response, $key): void
     {
         try {
             $valid = $this->getInstance()->validateResponseHandshake($response, $key);
-            $this->assertTrue(is_bool($valid), 'Validation return value is boolean');
+            $this->assertTrue(\is_bool($valid), 'Validation return value is boolean');
             $this->assertTrue($valid, 'Handshake response validates');
         } catch (Exception $e) {
             $this->fail('Validated valid response handshake as invalid');
@@ -52,34 +52,34 @@ abstract class ProtocolBaseTest extends BaseTest
     /**
      * @dataProvider getValidHandshakeResponses
      */
-    public function testGetResponseHandsake($unused, $key)
+    public function testGetResponseHandsake($unused, $key): void
     {
         try {
             $response = $this->getInstance()->getResponseHandshake($key);
             $this->assertHttpResponse($response);
         } catch (Exception $e) {
-            $this->fail('Unable to get handshake response: ' . $e);
+            $this->fail('Unable to get handshake response: '.$e);
         }
     }
 
     /**
-     * Asserts the string response is an HTTP response
+     * Asserts the string response is an HTTP response.
      *
      * @param string $response
      */
-    protected function assertHttpResponse($response, $message = '')
+    protected function assertHttpResponse($response, $message = ''): void
     {
-        $this->assertStringStartsWith('HTTP', $response, $message . ' - response starts well');
-        $this->assertStringEndsWith("\r\n", $response, $message . ' - response ends well');
+        $this->assertStringStartsWith('HTTP', $response, $message.' - response starts well');
+        $this->assertStringEndsWith("\r\n", $response, $message.' - response ends well');
     }
 
-    public function testGetVersion()
+    public function testGetVersion(): void
     {
         $version = $this->getInstance()->getVersion();
-        $this->assertTrue(is_int($version));
+        $this->assertTrue(\is_int($version));
     }
 
-    public function testGetResponseError()
+    public function testGetResponseError(): void
     {
         $response = $this->getInstance()->getResponseError(400);
         $this->assertHttpResponse($response, 'Code as int');
@@ -95,19 +95,19 @@ abstract class ProtocolBaseTest extends BaseTest
      * @dataProvider getValidOriginUris
      * @doesNotPerformAssertions
      */
-    public function testValidateOriginUriValid($uri)
+    public function testValidateOriginUriValid($uri): void
     {
         try {
             $valid = $this->getInstance()->validateOriginUri($uri);
         } catch (\Exception $e) {
-            $this->fail('Valid URI validated as invalid: ' . $e);
+            $this->fail('Valid URI validated as invalid: '.$e);
         }
     }
 
     /**
      * @dataProvider getInvalidOriginUris
      */
-    public function testValidateOriginUriInvalid($uri)
+    public function testValidateOriginUriInvalid($uri): void
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -136,7 +136,6 @@ abstract class ProtocolBaseTest extends BaseTest
     public function getValidHandshakeRequests()
     {
         $cases = [];
-
 
         $cases[] = ["GET /chat HTTP/1.1\r
 Host: server.example.com\r
@@ -169,11 +168,11 @@ Sec-WebSocket-Version: 13\r
     {
         $cases = [];
 
-        for ($i = 10; $i > 0; $i--) {
-            $key = sha1(time() . uniqid('', true));
-            $response = "Sec-WebSocket-Accept: "
-                . base64_encode(sha1($key . '258EAFA5-E914-47DA-95CA-C5AB0DC85B11', true))
-                . "\r\n\r\n";
+        for ($i = 10; $i > 0; --$i) {
+            $key = \sha1(\time().\uniqid('', true));
+            $response = 'Sec-WebSocket-Accept: '
+                .\base64_encode(\sha1($key.'258EAFA5-E914-47DA-95CA-C5AB0DC85B11', true))
+                ."\r\n\r\n";
 
             $cases[] = [$response, $key];
         }

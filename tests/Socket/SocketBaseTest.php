@@ -7,32 +7,33 @@ use Wrench\Test\BaseTest;
 abstract class SocketBaseTest extends BaseTest
 {
     /**
-     * Require constructor testing
+     * Require constructor testing.
      */
     abstract public function testConstructor();
 
     /**
      * @depends testConstructor
      */
-    public function testIsConnected($instance)
+    public function testIsConnected($instance): void
     {
         $connected = $instance->isConnected();
-        $this->assertTrue(is_bool($connected), 'isConnected returns boolean');
+        $this->assertTrue(\is_bool($connected), 'isConnected returns boolean');
         $this->assertFalse($connected);
     }
 
     /**
      * @dataProvider getValidNames
+     *
      * @param string $name
      */
-    public function testGetNamePart($name, $ip, $port)
+    public function testGetNamePart($name, $ip, $port): void
     {
         $this->assertEquals($ip, Socket::getNamePart($name, Socket::NAME_PART_IP), 'splits ip correctly');
         $this->assertEquals($port, Socket::getNamePart($name, Socket::NAME_PART_PORT), 'splits port correctly');
     }
 
     /**
-     * Data provider
+     * Data provider.
      */
     public function getValidNames()
     {

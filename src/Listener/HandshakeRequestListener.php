@@ -7,7 +7,7 @@ use Wrench\Connection;
 interface HandshakeRequestListener
 {
     /**
-     * Handshake request listener
+     * Handshake request listener.
      *
      * @param Connection $connection
      * @param string     $path

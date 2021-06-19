@@ -7,25 +7,26 @@ use Wrench\Exception\PayloadException;
 use Wrench\Util\Configurable;
 
 /**
- * Handles chunking and splitting of payloads into frames
+ * Handles chunking and splitting of payloads into frames.
  */
 class PayloadHandler extends Configurable
 {
     /**
-     * A callback that will be called when a complete payload is available
+     * A callback that will be called when a complete payload is available.
      *
      * @var callable
      */
     protected $callback;
 
     /**
-     * The current payload
+     * The current payload.
      */
     protected $payload;
 
     /**
      * @param callable $callback
      * @param array    $options
+     *
      * @throws InvalidArgumentException
      */
     public function __construct(callable $callback, array $options = [])
@@ -36,19 +37,20 @@ class PayloadHandler extends Configurable
     }
 
     /**
-     * Handles the raw socket data given
+     * Handles the raw socket data given.
      *
      * @param string $data
+     *
      * @throws PayloadException
      */
-    public function handle(string $data)
+    public function handle(string $data): void
     {
         if (!$this->payload) {
             $this->payload = $this->protocol->getPayload();
         }
 
         while ($data) { // Each iteration pulls off a single payload chunk
-            $size = strlen($data);
+            $size = \strlen($data);
             $remaining = $this->payload->getRemainingData();
 
             // If we don't yet know how much data is remaining, read data into
@@ -57,21 +59,21 @@ class PayloadHandler extends Configurable
             //
             // Then re-loop. For extended lengths, this will happen once or four
             // times extra, as the extended length is read in.
-            if ($remaining === null) {
+            if (null === $remaining) {
                 $chunkSize = 2;
             } elseif ($remaining > 0) {
                 $chunkSize = $remaining;
-            } elseif ($remaining === 0) {
+            } elseif (0 === $remaining) {
                 $chunkSize = 0;
             }
 
-            $chunkSize = min(strlen($data), $chunkSize);
-            $chunk = substr($data, 0, $chunkSize);
-            $data = substr($data, $chunkSize);
+            $chunkSize = \min(\strlen($data), $chunkSize);
+            $chunk = \substr($data, 0, $chunkSize);
+            $data = \substr($data, $chunkSize);
 
             $this->payload->receiveData($chunk);
 
-            if ($remaining !== 0 && !$this->payload->isComplete()) {
+            if (0 !== $remaining && !$this->payload->isComplete()) {
                 continue;
             }
 
@@ -85,12 +87,12 @@ class PayloadHandler extends Configurable
     }
 
     /**
-     * Emits a complete payload to the callback
+     * Emits a complete payload to the callback.
      *
      * @param Payload $payload
      */
-    protected function emit(Payload $payload)
+    protected function emit(Payload $payload): void
     {
-        call_user_func($this->callback, $payload);
+        \call_user_func($this->callback, $payload);
     }
 }

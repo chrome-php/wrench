@@ -7,7 +7,7 @@ namespace Wrench\Protocol;
  */
 class Hybi10Protocol extends HybiProtocol
 {
-    const VERSION = 10;
+    public const VERSION = 10;
 
     /**
      * @see Protocol::getVersion()
@@ -22,7 +22,7 @@ class Hybi10Protocol extends HybiProtocol
      */
     public function acceptsVersion($version)
     {
-        $version = (int)$version;
+        $version = (int) $version;
 
         if ($version <= 10 && $version >= 10) {
             return true;

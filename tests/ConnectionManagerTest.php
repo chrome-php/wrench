@@ -6,16 +6,16 @@ use Wrench\Application\DataHandlerInterface;
 use Wrench\Test\BaseTest;
 
 /**
- * Tests the ConnectionManager class
+ * Tests the ConnectionManager class.
  */
 class ConnectionManagerTest extends BaseTest
 {
     /**
-     * Tests the constructor
+     * Tests the constructor.
      *
      * @dataProvider getValidConstructorArguments
      */
-    public function testValidConstructorArguments($server, array $options)
+    public function testValidConstructorArguments($server, array $options): void
     {
         $this->assertInstanceOfClass(
             $instance = $this->getInstance(
@@ -27,7 +27,7 @@ class ConnectionManagerTest extends BaseTest
     }
 
     /**
-     * Tests the constructor
+     * Tests the constructor.
      */
     public function testConstructor()
     {
@@ -38,11 +38,12 @@ class ConnectionManagerTest extends BaseTest
             ),
             'Constructor'
         );
+
         return $instance;
     }
 
     /**
-     * Gets a mock server
+     * Gets a mock server.
      */
     protected function getMockServer()
     {
@@ -58,14 +59,13 @@ class ConnectionManagerTest extends BaseTest
     }
 
     /**
-     * Gets a mock application
+     * Gets a mock application.
      *
      * @return EchoApplication
      */
     protected function getMockApplication()
     {
-        return new class implements DataHandlerInterface
-        {
+        return new class() implements DataHandlerInterface {
             public function onData(string $data, Connection $connection): void
             {
                 $connection->send($data);
@@ -75,15 +75,16 @@ class ConnectionManagerTest extends BaseTest
 
     /**
      * @depends testConstructor
+     *
      * @param ConnectionManager $instance
      */
-    public function testCount($instance)
+    public function testCount($instance): void
     {
-        $this->assertTrue(is_numeric($instance->count()));
+        $this->assertTrue(\is_numeric($instance->count()));
     }
 
     /**
-     * Data provider
+     * Data provider.
      */
     public function getValidConstructorArguments()
     {

@@ -10,11 +10,11 @@ use Wrench\Test\BaseTest;
 use Wrench\Test\ServerTestHelper;
 
 /**
- * Tests the client class
+ * Tests the client class.
  */
 class ClientTest extends BaseTest
 {
-    public function testConstructor()
+    public function testConstructor(): void
     {
         $this->assertInstanceOfClass(
             $client = new Client(
@@ -35,7 +35,7 @@ class ClientTest extends BaseTest
     }
 
     /**
-     * Gets a mock socket
+     * Gets a mock socket.
      *
      * @return \Wrench\Socket\Socket|\PHPUnit_Framework_MockObject_MockObject
      */
@@ -47,42 +47,42 @@ class ClientTest extends BaseTest
             ->getMock();
     }
 
-    public function testConstructorUriInvalid()
+    public function testConstructorUriInvalid(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new Client('invalid uri', 'http://www.example.com/');
     }
 
-    public function testConstructorUriEmpty()
+    public function testConstructorUriEmpty(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new Client(null, 'http://www.example.com/');
     }
 
-    public function testConstructorUriPathUnspecified()
+    public function testConstructorUriPathUnspecified(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new Client('ws://localhost', 'http://www.example.com/');
     }
 
-    public function testConstructorOriginEmpty()
+    public function testConstructorOriginEmpty(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new Client('wss://localhost', null);
     }
 
-    public function testConstructorOriginInvalid()
+    public function testConstructorOriginInvalid(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new Client('ws://localhost:8000', 'NOTAVALIDURI');
     }
 
-    public function testSend()
+    public function testSend(): void
     {
         try {
             $helper = new ServerTestHelper();
@@ -100,7 +100,7 @@ class ClientTest extends BaseTest
 
             $this->assertFalse($instance->connect(), 'Double connect');
 
-            $this->assertFalse((boolean)$instance->receive(), 'No data');
+            $this->assertFalse((bool) $instance->receive(), 'No data');
 
             $bytes = $instance->sendData('foobar', Protocol::TYPE_TEXT);
             $this->assertTrue($bytes >= 6, 'sent text frame');
@@ -108,9 +108,9 @@ class ClientTest extends BaseTest
             $bytes = $instance->sendData('baz', Protocol::TYPE_TEXT);
             $this->assertTrue($bytes >= 3, 'sent text frame');
 
-            usleep(500000);
+            \usleep(500000);
             $responses = $instance->receive();
-            $this->assertTrue(is_array($responses));
+            $this->assertTrue(\is_array($responses));
             $this->assertCount(2, $responses);
             $this->assertInstanceOf(Payload::class, $responses[0]);
             $this->assertInstanceOf(Payload::class, $responses[1]);
@@ -118,9 +118,9 @@ class ClientTest extends BaseTest
             $bytes = $instance->sendData('baz', Protocol::TYPE_TEXT);
             $this->assertTrue($bytes >= 3, 'sent text frame');
 
-            # test fix for issue #43
+            // test fix for issue #43
             $responses = $instance->receive();
-            $this->assertTrue(is_array($responses));
+            $this->assertTrue(\is_array($responses));
             $this->assertCount(1, $responses);
             $this->assertInstanceOf(Payload::class, $responses[0]);
 

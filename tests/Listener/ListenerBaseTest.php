@@ -6,16 +6,17 @@ use Wrench\Server;
 use Wrench\Test\BaseTest;
 
 /**
- * Payload test
+ * Payload test.
  */
 abstract class ListenerBaseTest extends BaseTest
 {
     /**
      * @depends testConstructor
+     *
      * @param Listener $instance
      * @doesNotPerformAssertions
      */
-    public function testListen(Listener $instance)
+    public function testListen(Listener $instance): void
     {
         $server = $this->createMock(Server::class);
         $instance->listen($server);

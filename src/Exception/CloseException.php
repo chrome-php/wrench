@@ -6,7 +6,7 @@ use Wrench\Exception\Exception as WrenchException;
 use Wrench\Protocol\Protocol;
 
 /**
- * Close connection exception
+ * Close connection exception.
  */
 class CloseException extends WrenchException
 {
@@ -17,7 +17,7 @@ class CloseException extends WrenchException
      */
     public function __construct($message = null, $code = null, $previous = null)
     {
-        if ($code == null) {
+        if (null == $code) {
             $code = Protocol::CLOSE_UNEXPECTED;
         }
         parent::__construct($message, $code, $previous);

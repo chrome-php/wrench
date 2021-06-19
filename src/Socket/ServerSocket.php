@@ -5,72 +5,69 @@ namespace Wrench\Socket;
 use Wrench\Exception\ConnectionException;
 
 /**
- * Server socket
+ * Server socket.
  *
  * Used for a server's "master" socket that binds to the configured
  * interface and listens
  */
 class ServerSocket extends UriSocket
 {
-    const TIMEOUT_ACCEPT = 5;
+    public const TIMEOUT_ACCEPT = 5;
 
     /**
-     * Whether the socket is listening
+     * Whether the socket is listening.
      *
-     * @var boolean
+     * @var bool
      */
     protected $listening = false;
 
     /**
-     * Listens
+     * Listens.
      *
      * @throws ConnectionException
      */
     public function listen(): void
     {
-        $this->socket = stream_socket_server(
+        $this->socket = \stream_socket_server(
             $this->getUri(),
             $errno,
             $errstr,
-            STREAM_SERVER_BIND | STREAM_SERVER_LISTEN,
+            \STREAM_SERVER_BIND | \STREAM_SERVER_LISTEN,
             $this->getStreamContext()
         );
 
         if (!$this->socket) {
-            throw new ConnectionException(sprintf(
-                'Could not listen on socket: %s (%d)',
-                $errstr,
-                $errno
-            ));
+            throw new ConnectionException(\sprintf('Could not listen on socket: %s (%d)', $errstr, $errno));
         }
 
         $this->listening = true;
     }
 
     /**
-     * Accepts a new connection on the socket
+     * Accepts a new connection on the socket.
      *
      * @throws ConnectionException
+     *
      * @return resource
      */
     public function accept()
     {
-        $new = stream_socket_accept(
+        $new = \stream_socket_accept(
             $this->socket,
             $this->options['timeout_accept']
         );
 
         if (!$new) {
-            throw new ConnectionException(socket_strerror(socket_last_error($new)));
+            throw new ConnectionException(\socket_strerror(\socket_last_error($new)));
         }
-        
-        socket_set_option(socket_import_stream($new), SOL_TCP, TCP_NODELAY, 1);
+
+        \socket_set_option(\socket_import_stream($new), \SOL_TCP, \TCP_NODELAY, 1);
 
         return $new;
     }
 
     /**
-     * Configure the server socket
+     * Configure the server socket.
      *
      *   Options include:
      *     - backlog               => int, used to limit the number of outstanding
@@ -83,7 +80,7 @@ class ServerSocket extends UriSocket
      */
     protected function configure(array $options): void
     {
-        $options = array_merge([
+        $options = \array_merge([
             'backlog' => 50,
             'ssl_cert_file' => null,
             'ssl_passphrase' => null,
@@ -116,7 +113,7 @@ class ServerSocket extends UriSocket
 
         // Otherwise map any options through
         foreach ($this->options as $option => $value) {
-            if (preg_match('/^server_ssl_(.*)$/', $option, $matches)) {
+            if (\preg_match('/^server_ssl_(.*)$/', $option, $matches)) {
                 $options[$matches[1]] = $value;
             }
         }
