@@ -15,28 +15,28 @@ class RateLimiter extends Configurable implements Listener, LoggerAwareInterface
     use LoggerAwareTrait;
 
     /**
-     * The server being limited
+     * The server being limited.
      *
      * @var Server
      */
     protected $server;
 
     /**
-     * Connection counts per IP address
+     * Connection counts per IP address.
      *
      * @var array<int>
      */
     protected $ips = [];
 
     /**
-     * Request tokens per IP address
+     * Request tokens per IP address.
      *
      * @var array<array<int>>
      */
     protected $requests = [];
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param array $options
      */
@@ -68,7 +68,7 @@ class RateLimiter extends Configurable implements Listener, LoggerAwareInterface
     }
 
     /**
-     * Event listener
+     * Event listener.
      *
      * @param resource   $socket
      * @param Connection $connection
@@ -80,11 +80,11 @@ class RateLimiter extends Configurable implements Listener, LoggerAwareInterface
     }
 
     /**
-     * Idempotent
+     * Idempotent.
      *
      * @param Connection $connection
      */
-    protected function checkConnections($connection)
+    protected function checkConnections($connection): void
     {
         $connections = $connection->getConnectionManager()->count();
 
@@ -94,14 +94,14 @@ class RateLimiter extends Configurable implements Listener, LoggerAwareInterface
     }
 
     /**
-     * Limits the given connection
+     * Limits the given connection.
      *
      * @param Connection $connection
-     * @param string     $limit Reason
+     * @param string     $limit      Reason
      */
-    protected function limit($connection, $limit)
+    protected function limit($connection, $limit): void
     {
-        $this->logger->notice(sprintf(
+        $this->logger->notice(\sprintf(
             'Limiting connection %s: %s',
             $connection->getIp(),
             $limit
@@ -111,23 +111,24 @@ class RateLimiter extends Configurable implements Listener, LoggerAwareInterface
     }
 
     /**
-     * NOT idempotent, call once per connection
+     * NOT idempotent, call once per connection.
      *
      * @param Connection $connection
      */
-    protected function checkConnectionsPerIp($connection)
+    protected function checkConnectionsPerIp($connection): void
     {
         $ip = $connection->getIp();
 
         if (!$ip) {
             $this->logger->warning('Cannot check connections per IP');
+
             return;
         }
 
         if (!isset($this->ips[$ip])) {
             $this->ips[$ip] = 1;
         } else {
-            $this->ips[$ip] = min(
+            $this->ips[$ip] = \min(
                 $this->options['connections_per_ip'],
                 $this->ips[$ip] + 1
             );
@@ -139,7 +140,7 @@ class RateLimiter extends Configurable implements Listener, LoggerAwareInterface
     }
 
     /**
-     * Event listener
+     * Event listener.
      *
      * @param resource   $socket
      * @param Connection $connection
@@ -150,7 +151,7 @@ class RateLimiter extends Configurable implements Listener, LoggerAwareInterface
     }
 
     /**
-     * NOT idempotent, call once per disconnection
+     * NOT idempotent, call once per disconnection.
      *
      * @param Connection $connection
      */
@@ -160,20 +161,21 @@ class RateLimiter extends Configurable implements Listener, LoggerAwareInterface
 
         if (!$ip) {
             $this->logger->warning('Cannot release connection');
+
             return;
         }
 
         if (!isset($this->ips[$ip])) {
             $this->ips[$ip] = 0;
         } else {
-            $this->ips[$ip] = max(0, $this->ips[$ip] - 1);
+            $this->ips[$ip] = \max(0, $this->ips[$ip] - 1);
         }
 
         unset($this->requests[$connection->getId()]);
     }
 
     /**
-     * Event listener
+     * Event listener.
      *
      * @param resource   $socket
      * @param Connection $connection
@@ -184,11 +186,11 @@ class RateLimiter extends Configurable implements Listener, LoggerAwareInterface
     }
 
     /**
-     * NOT idempotent, call once per data
+     * NOT idempotent, call once per data.
      *
      * @param Connection $connection
      */
-    protected function checkRequestsPerMinute(Connection $connection)
+    protected function checkRequestsPerMinute(Connection $connection): void
     {
         $id = $connection->getId();
 
@@ -197,14 +199,14 @@ class RateLimiter extends Configurable implements Listener, LoggerAwareInterface
         }
 
         // Add current token
-        $this->requests[$id][] = time();
+        $this->requests[$id][] = \time();
 
         // Expire old tokens
-        while (reset($this->requests[$id]) < time() - 60) {
-            array_shift($this->requests[$id]);
+        while (\reset($this->requests[$id]) < \time() - 60) {
+            \array_shift($this->requests[$id]);
         }
 
-        if (count($this->requests[$id]) > $this->options['requests_per_minute']) {
+        if (\count($this->requests[$id]) > $this->options['requests_per_minute']) {
             $this->limit($connection, 'Requests per minute');
         }
     }
@@ -214,10 +216,10 @@ class RateLimiter extends Configurable implements Listener, LoggerAwareInterface
      */
     protected function configure(array $options): void
     {
-        $options = array_merge([
+        $options = \array_merge([
             'connections' => 200, // Total
             'connections_per_ip' => 5,   // At once
-            'requests_per_minute' => 200  // Per connection
+            'requests_per_minute' => 200,  // Per connection
         ], $options);
 
         parent::configure($options);

@@ -18,24 +18,24 @@ use Wrench\Util\Configurable;
 abstract class Socket extends Configurable implements Resource
 {
     /**
-     * Default timeout for socket operations (reads, writes)
+     * Default timeout for socket operations (reads, writes).
      *
      * @var int seconds
      */
-    const TIMEOUT_SOCKET = 5;
+    public const TIMEOUT_SOCKET = 5;
 
     /**
      * @var int
      */
-    const DEFAULT_RECEIVE_LENGTH = '1400';
+    public const DEFAULT_RECEIVE_LENGTH = '1400';
 
     /**#@+
      * Socket name parts
      *
      * @var int
      */
-    const NAME_PART_IP = 0;
-    const NAME_PART_PORT = 1;
+    public const NAME_PART_IP = 0;
+    public const NAME_PART_PORT = 1;
     /**#@-*/
 
     /**
@@ -44,7 +44,7 @@ abstract class Socket extends Configurable implements Resource
     protected $socket = null;
 
     /**
-     * Stream context
+     * Stream context.
      */
     protected $context = null;
 
@@ -54,21 +54,22 @@ abstract class Socket extends Configurable implements Resource
      * connected at least. See $handshaked, and other properties in
      * subclasses.
      *
-     * @var boolean
+     * @var bool
      */
     protected $connected = false;
 
     /**
-     * The socket name according to stream_socket_get_name
+     * The socket name according to stream_socket_get_name.
      *
      * @var string|null
      */
     protected $name;
 
     /**
-     * Gets the IP address of the socket
+     * Gets the IP address of the socket.
      *
      * @throws \Wrench\Exception\SocketException If the IP address cannot be obtained
+     *
      * @return string
      */
     public function getIp(): string
@@ -83,18 +84,18 @@ abstract class Socket extends Configurable implements Resource
     }
 
     /**
-     * Gets the name of the socket
+     * Gets the name of the socket.
      *
      * @return string|null
      */
     protected function getName(): ?string
     {
-        if ($this->socket === null) {
+        if (null === $this->socket) {
             return null;
         }
 
         if (!$this->name) {
-            $this->name = @stream_socket_get_name($this->socket, true);
+            $this->name = @\stream_socket_get_name($this->socket, true);
         }
 
         return $this->name;
@@ -107,10 +108,12 @@ abstract class Socket extends Configurable implements Resource
      * So, the part number here is either the last : delimited section (the port)
      * or all the other sections (the whole initial part, the address).
      *
-     * @param string $name (from $this->getName() usually)
-     * @param        int   <0, 1> $part
-     * @return string
+     * @param string       $name (from $this->getName() usually)
+     * @param int   <0, 1> $part
+     *
      * @throws SocketException
+     *
+     * @return string
      */
     public static function getNamePart(string $name, int $part): string
     {
@@ -118,25 +121,26 @@ abstract class Socket extends Configurable implements Resource
             throw new InvalidArgumentException('Invalid name');
         }
 
-        $parts = explode(':', $name);
+        $parts = \explode(':', $name);
 
-        if (count($parts) < 2) {
-            throw new SocketException('Could not parse name parts: ' . $name);
+        if (\count($parts) < 2) {
+            throw new SocketException('Could not parse name parts: '.$name);
         }
 
-        if ($part == self::NAME_PART_PORT) {
-            return end($parts);
-        } elseif ($part == self::NAME_PART_IP) {
-            return implode(':', array_slice($parts, 0, -1));
+        if (self::NAME_PART_PORT == $part) {
+            return \end($parts);
+        } elseif (self::NAME_PART_IP == $part) {
+            return \implode(':', \array_slice($parts, 0, -1));
         } else {
             throw new InvalidArgumentException('Invalid name part');
         }
     }
 
     /**
-     * Gets the port of the socket
+     * Gets the port of the socket.
      *
      * @throws \Wrench\Exception\SocketException If the port cannot be obtained
+     *
      * @return int
      */
     public function getPort(): int
@@ -144,27 +148,28 @@ abstract class Socket extends Configurable implements Resource
         $name = $this->getName();
 
         if ($name) {
-            return (int)self::getNamePart($name, self::NAME_PART_PORT);
+            return (int) self::getNamePart($name, self::NAME_PART_PORT);
         } else {
             throw new SocketException('Cannot get socket IP address');
         }
     }
 
     /**
-     * Get the last error that occurred on the socket
+     * Get the last error that occurred on the socket.
      *
      * @return string
      */
     public function getLastError(): string
     {
         if ($this->isConnected() && $this->socket) {
-            $err = @socket_last_error($this->socket);
+            $err = @\socket_last_error($this->socket);
             if ($err) {
-                $err = socket_strerror($err);
+                $err = \socket_strerror($err);
             }
             if (!$err) {
                 $err = 'Unknown error';
             }
+
             return $err;
         } else {
             return 'Not connected';
@@ -172,7 +177,7 @@ abstract class Socket extends Configurable implements Resource
     }
 
     /**
-     * Whether the socket is currently connected
+     * Whether the socket is currently connected.
      *
      * @return bool
      */
@@ -191,13 +196,15 @@ abstract class Socket extends Configurable implements Resource
 
     public function getResourceId(): int
     {
-        return (int)$this->socket;
+        return (int) $this->socket;
     }
 
     /**
      * @param string $data Binary data to send down the socket
+     *
      * @throws SocketException
-     * @return null|int The number of bytes sent or null on error
+     *
+     * @return int|null The number of bytes sent or null on error
      */
     public function send(string $data): ?int
     {
@@ -205,18 +212,18 @@ abstract class Socket extends Configurable implements Resource
             throw new SocketException('Socket is not connected');
         }
 
-        $length = strlen($data);
+        $length = \strlen($data);
 
-        if ($length == 0) {
+        if (0 == $length) {
             return 0;
         }
 
         for ($i = $length; $i > 0; $i -= $written) {
-            $written = @fwrite($this->socket, substr($data, -1 * $i));
+            $written = @\fwrite($this->socket, \substr($data, -1 * $i));
 
-            if ($written === false) {
+            if (false === $written) {
                 return null;
-            } elseif ($written === 0) {
+            } elseif (0 === $written) {
                 return null;
             }
         }
@@ -225,9 +232,10 @@ abstract class Socket extends Configurable implements Resource
     }
 
     /**
-     * Receive data from the socket
+     * Receive data from the socket.
      *
      * @param int $length
+     *
      * @return string
      */
     public function receive(int $length = self::DEFAULT_RECEIVE_LENGTH): string
@@ -240,21 +248,21 @@ abstract class Socket extends Configurable implements Resource
             do {
                 // feof means socket has been closed
                 // also, sometimes in long running processes the system seems to kill the underlying socket
-                if (!$this->socket || feof($this->socket)) {
+                if (!$this->socket || \feof($this->socket)) {
                     $this->disconnect();
 
                     return $buffer;
                 }
 
-                $result = fread($this->socket, $length);
+                $result = \fread($this->socket, $length);
 
                 if ($makeBlockingAfterRead) {
-                    stream_set_blocking($this->socket, true);
+                    \stream_set_blocking($this->socket, true);
                     $makeBlockingAfterRead = false;
                 }
 
                 // fread FALSE means socket has been closed
-                if ($result === false) {
+                if (false === $result) {
                     $this->disconnect();
 
                     return $buffer;
@@ -263,7 +271,7 @@ abstract class Socket extends Configurable implements Resource
                 $buffer .= $result;
 
                 // feof means socket has been closed
-                if (feof($this->socket)) {
+                if (\feof($this->socket)) {
                     $this->disconnect();
 
                     return $buffer;
@@ -271,17 +279,17 @@ abstract class Socket extends Configurable implements Resource
 
                 $continue = false;
 
-                if (strlen($result) == 1) {
+                if (1 == \strlen($result)) {
                     // Workaround Chrome behavior (still needed?)
                     $continue = true;
                 }
 
-                if (strlen($result) == $length) {
+                if (\strlen($result) == $length) {
                     $continue = true;
                 }
 
                 // Continue if more data to be read
-                $metadata = stream_get_meta_data($this->socket);
+                $metadata = \stream_get_meta_data($this->socket);
 
                 if ($metadata && isset($metadata['unread_bytes'])) {
                     if (!$metadata['unread_bytes']) {
@@ -297,7 +305,7 @@ abstract class Socket extends Configurable implements Resource
 
                             // Socket is a blocking by default. When we do a blocking read from an empty
                             // queue it will block and the server will hang. https://bugs.php.net/bug.php?id=1739
-                            stream_set_blocking($this->socket, false);
+                            \stream_set_blocking($this->socket, false);
                             $makeBlockingAfterRead = true;
                         }
                     }
@@ -306,21 +314,21 @@ abstract class Socket extends Configurable implements Resource
 
             return $buffer;
         } finally {
-            if ($this->socket && !feof($this->socket) && $makeBlockingAfterRead) {
-                stream_set_blocking($this->socket, true);
+            if ($this->socket && !\feof($this->socket) && $makeBlockingAfterRead) {
+                \stream_set_blocking($this->socket, true);
             }
         }
     }
 
     /**
-     * Disconnect the socket
+     * Disconnect the socket.
      *
      * @return void
      */
     public function disconnect(): void
     {
         if ($this->socket) {
-            stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
+            \stream_socket_shutdown($this->socket, \STREAM_SHUT_RDWR);
         }
         $this->socket = null;
         $this->connected = false;
@@ -329,14 +337,15 @@ abstract class Socket extends Configurable implements Resource
     /**
      * Configure options
      * Options include
-     *   - timeout_socket       => int, seconds, default 5
+     *   - timeout_socket       => int, seconds, default 5.
      *
      * @param array $options
+     *
      * @return void
      */
     protected function configure(array $options): void
     {
-        $options = array_merge([
+        $options = \array_merge([
             'timeout_socket' => self::TIMEOUT_SOCKET,
         ], $options);
 

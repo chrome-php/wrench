@@ -6,12 +6,12 @@ use Wrench\Protocol\Protocol;
 use Wrench\Test\BaseTest;
 
 /**
- * Frame test
+ * Frame test.
  */
 abstract class FrameBaseTest extends BaseTest
 {
     /**
-     * A fresh instance of the class being tested
+     * A fresh instance of the class being tested.
      *
      * @var Frame
      */
@@ -29,6 +29,7 @@ abstract class FrameBaseTest extends BaseTest
     protected function getNewFrame()
     {
         $class = $this->getClass();
+
         return new $class();
     }
 
@@ -45,14 +46,14 @@ abstract class FrameBaseTest extends BaseTest
      * @param string $payload
      * @dataProvider getValidEncodePayloads
      */
-    public function testBijection($type, $payload, $masked)
+    public function testBijection($type, $payload, $masked): void
     {
         // Encode the payload
         $this->frame->encode($payload, $type, $masked);
 
         // Get the resulting buffer
         $buffer = $this->frame->getFrameBuffer();
-        $this->assertTrue((boolean)$buffer, 'Got raw frame buffer');
+        $this->assertTrue((bool) $buffer, 'Got raw frame buffer');
 
         // And feed it back into a new frame
         $frame = $this->getNewFrame();
@@ -115,7 +116,7 @@ abstract class FrameBaseTest extends BaseTest
      * @param string $payload
      * @dataProvider getValidEncodePayloads
      */
-    public function testEncodeTypeReflection($type, $payload, $masked)
+    public function testEncodeTypeReflection($type, $payload, $masked): void
     {
         $this->frame->encode($payload, $type);
         $this->assertEquals(Protocol::TYPE_TEXT, $this->frame->getType(), 'Encode retains type information');
@@ -125,24 +126,24 @@ abstract class FrameBaseTest extends BaseTest
      * @param string $payload
      * @dataProvider getValidEncodePayloads
      */
-    public function testEncodeLengthReflection($type, $payload, $masked)
+    public function testEncodeLengthReflection($type, $payload, $masked): void
     {
         $this->frame->encode($payload, $type);
-        $this->assertEquals(strlen($payload), $this->frame->getLength(), 'Encode does not alter payload length');
+        $this->assertEquals(\strlen($payload), $this->frame->getLength(), 'Encode does not alter payload length');
     }
 
     /**
      * @param string $payload
      * @dataProvider getValidEncodePayloads
      */
-    public function testEncodePayloadReflection($type, $payload, $masked)
+    public function testEncodePayloadReflection($type, $payload, $masked): void
     {
         $this->frame->encode($payload, $type, $masked);
         $this->assertEquals($payload, $this->frame->getFramePayload(), 'Encode retains payload information');
     }
 
     /**
-     * Data provider
+     * Data provider.
      *
      * @return array<string>
      */
@@ -157,7 +158,7 @@ abstract class FrameBaseTest extends BaseTest
             ],
             [
                 Protocol::TYPE_TEXT,
-                pack('CCCCCCC', 0x00, 0x01, 0x02, 0x03, 0x04, 0xff, 0xf0),
+                \pack('CCCCCCC', 0x00, 0x01, 0x02, 0x03, 0x04, 0xff, 0xf0),
                 true,
             ],
             [Protocol::TYPE_TEXT, ' ', true],

@@ -5,7 +5,7 @@ namespace Wrench;
 use Psr\Log\NullLogger;
 
 /**
- * Tests the BasicServer class
+ * Tests the BasicServer class.
  */
 class BasicServerTest extends ServerTest
 {
@@ -14,7 +14,7 @@ class BasicServerTest extends ServerTest
      * @param string $origin
      * @dataProvider getValidOrigins
      */
-    public function testValidOriginPolicy(array $allowed, $origin)
+    public function testValidOriginPolicy(array $allowed, $origin): void
     {
         $server = $this->getInstance('ws://localhost:8000', [
             'allowed_origins' => $allowed,
@@ -41,7 +41,7 @@ class BasicServerTest extends ServerTest
      * @param string $origin
      * @dataProvider getInvalidOrigins
      */
-    public function testInvalidOriginPolicy(array $allowed, $origin)
+    public function testInvalidOriginPolicy(array $allowed, $origin): void
     {
         $server = $this->getInstance('ws://localhost:8000', [
             'allowed_origins' => $allowed,
@@ -68,7 +68,7 @@ class BasicServerTest extends ServerTest
      */
     public function getValidConstructorArguments()
     {
-        return array_merge(parent::getValidConstructorArguments(), [
+        return \array_merge(parent::getValidConstructorArguments(), [
             [
                 'ws://localhost:8000',
                 ['logger' => new NullLogger()],
@@ -77,7 +77,7 @@ class BasicServerTest extends ServerTest
     }
 
     /**
-     * Data provider
+     * Data provider.
      *
      * @return array<array<mixed>>
      */
@@ -90,7 +90,7 @@ class BasicServerTest extends ServerTest
     }
 
     /**
-     * Data provider
+     * Data provider.
      *
      * @return array<array<mixed>>
      */

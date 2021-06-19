@@ -7,7 +7,7 @@ use Wrench\Exception\SocketException;
 class ServerClientSocketTest extends SocketBaseTest
 {
     /**
-     * By default, the socket has not required arguments
+     * By default, the socket has not required arguments.
      */
     public function testConstructor()
     {
@@ -21,7 +21,7 @@ class ServerClientSocketTest extends SocketBaseTest
     /**
      * @depends testConstructor
      */
-    public function testGetIpTooSoon($instance)
+    public function testGetIpTooSoon($instance): void
     {
         $this->expectException(SocketException::class);
 
@@ -31,7 +31,7 @@ class ServerClientSocketTest extends SocketBaseTest
     /**
      * @depends testConstructor
      */
-    public function testGetPortTooSoon($instance)
+    public function testGetPortTooSoon($instance): void
     {
         $this->expectException(SocketException::class);
 

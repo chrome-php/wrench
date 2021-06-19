@@ -10,13 +10,14 @@ class RateLimiterTest extends ListenerBaseTest
     {
         $instance = $this->getInstance();
         $this->assertInstanceOfClass($instance, 'No constructor arguments');
+
         return $instance;
     }
 
     /**
      * @doesNotPerformAssertions
      */
-    public function testOnSocketConnect()
+    public function testOnSocketConnect(): void
     {
         $this->getInstance()->onSocketConnect(null, $this->getConnection());
     }
@@ -49,7 +50,7 @@ class RateLimiterTest extends ListenerBaseTest
     /**
      * @doesNotPerformAssertions
      */
-    public function testOnSocketDisconnect()
+    public function testOnSocketDisconnect(): void
     {
         $this->getInstance()->onSocketDisconnect(null, $this->getConnection());
     }
@@ -57,7 +58,7 @@ class RateLimiterTest extends ListenerBaseTest
     /**
      * @doesNotPerformAssertions
      */
-    public function testOnClientData()
+    public function testOnClientData(): void
     {
         $this->getInstance()->onClientData(null, $this->getConnection());
     }

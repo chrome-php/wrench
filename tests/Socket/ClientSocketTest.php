@@ -11,7 +11,7 @@ use Wrench\Test\ServerTestHelper;
 class ClientSocketTest extends UriSocketTest
 {
     /**
-     * Overridden to use with the depends annotation
+     * Overridden to use with the depends annotation.
      */
     public function testConstructor()
     {
@@ -42,7 +42,7 @@ class ClientSocketTest extends UriSocketTest
         return $instance;
     }
 
-    public function testOptions()
+    public function testOptions(): void
     {
         $socket = null;
 
@@ -77,7 +77,7 @@ class ClientSocketTest extends UriSocketTest
         );
     }
 
-    public function testProtocolTypeError()
+    public function testProtocolTypeError(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -89,25 +89,24 @@ class ClientSocketTest extends UriSocketTest
         );
     }
 
-    public function testConstructorUriEmpty()
+    public function testConstructorUriEmpty(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new ClientSocket(null);
     }
 
-    public function testConstructorUriInvalid()
+    public function testConstructorUriInvalid(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new ClientSocket('Bad argument');
     }
 
-
     /**
      * @depends testConstructor
      */
-    public function testSendTooEarly($instance)
+    public function testSendTooEarly($instance): void
     {
         $this->expectException(SocketException::class);
 
@@ -115,9 +114,9 @@ class ClientSocketTest extends UriSocketTest
     }
 
     /**
-     * Test the connect, send, receive method
+     * Test the connect, send, receive method.
      */
-    public function testConnect()
+    public function testConnect(): void
     {
         try {
             $helper = new ServerTestHelper();

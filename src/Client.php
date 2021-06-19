@@ -11,7 +11,7 @@ use Wrench\Socket\ClientSocket;
 use Wrench\Util\Configurable;
 
 /**
- * Client class
+ * Client class.
  *
  * Represents a websocket client
  */
@@ -20,7 +20,7 @@ class Client extends Configurable
     /**
      * @var int bytes
      */
-    const MAX_HANDSHAKE_RESPONSE = '1500';
+    public const MAX_HANDSHAKE_RESPONSE = '1500';
 
     /**
      * @var string
@@ -38,16 +38,16 @@ class Client extends Configurable
     protected $socket;
 
     /**
-     * Request headers
+     * Request headers.
      *
      * @var array
      */
     protected $headers = [];
 
     /**
-     * Whether the client is connected
+     * Whether the client is connected.
      *
-     * @var boolean
+     * @var bool
      */
     protected $connected = false;
 
@@ -57,33 +57,33 @@ class Client extends Configurable
     protected $payloadHandler = null;
 
     /**
-     * Complete received payloads
+     * Complete received payloads.
      *
      * @var array<Payload>
      */
     protected $received = [];
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param string $uri
-     * @param string $origin    The origin to include in the handshake (required
-     *                          in later versions of the protocol)
-     * @param array  $options   (optional) Array of options
-     *                          - socket   => Socket instance (otherwise created)
-     *                          - protocol => Protocol
+     * @param string $origin  The origin to include in the handshake (required
+     *                        in later versions of the protocol)
+     * @param array  $options (optional) Array of options
+     *                        - socket   => Socket instance (otherwise created)
+     *                        - protocol => Protocol
      */
     public function __construct($uri, $origin, array $options = [])
     {
         parent::__construct($options);
 
-        $uri = (string)$uri;
+        $uri = (string) $uri;
         if (!$uri) {
             throw new InvalidArgumentException('No URI specified');
         }
         $this->uri = $uri;
 
-        $origin = (string)$origin;
+        $origin = (string) $origin;
         if (!$origin) {
             throw new InvalidArgumentException('No origin specified');
         }
@@ -97,9 +97,9 @@ class Client extends Configurable
     }
 
     /**
-     * Configures the client socket
+     * Configures the client socket.
      */
-    protected function configureSocket()
+    protected function configureSocket(): void
     {
         $class = $this->options['socket_class'];
         $options = $this->options['socket_options'];
@@ -107,9 +107,9 @@ class Client extends Configurable
     }
 
     /**
-     * Configures the payload handler
+     * Configures the payload handler.
      */
-    protected function configurePayloadHandler()
+    protected function configurePayloadHandler(): void
     {
         $this->payloadHandler = new PayloadHandler([$this, 'onData'], $this->options);
     }
@@ -121,33 +121,35 @@ class Client extends Configurable
      *
      * @param Payload $payload
      */
-    public function onData(Payload $payload)
+    public function onData(Payload $payload): void
     {
         $this->received[] = $payload;
         if (($callback = $this->options['on_data_callback'])) {
-            call_user_func($callback, $payload);
+            \call_user_func($callback, $payload);
         }
     }
 
     /**
      * Adds a request header to be included in the initial handshake
-     * For example, to include a Cookie header
+     * For example, to include a Cookie header.
      *
      * @param string $name
      * @param string $value
+     *
      * @return void
      */
-    public function addRequestHeader($name, $value)
+    public function addRequestHeader($name, $value): void
     {
         $this->headers[$name] = $value;
     }
 
     /**
-     * Sends data to the socket
+     * Sends data to the socket.
      *
-     * @param string  $data
-     * @param int     $type See Protocol::TYPE_*
-     * @param boolean $masked
+     * @param string $data
+     * @param int    $type   See Protocol::TYPE_*
+     * @param bool   $masked
+     *
      * @return bool Success
      */
     public function sendData(string $data, int $type = Protocol::TYPE_TEXT, $masked = true)
@@ -169,18 +171,18 @@ class Client extends Configurable
 
     /**
      * Returns whether the client is currently connected
-     * Also checks the state of the underlying socket
+     * Also checks the state of the underlying socket.
      *
      * @return bool
      */
     public function isConnected()
     {
-        if ($this->connected === false) {
+        if (false === $this->connected) {
             return false;
         }
 
         // Check if the socket is still connected
-        if ($this->socket->isConnected() === false) {
+        if (false === $this->socket->isConnected()) {
             $this->connected = false;
 
             return false;
@@ -190,7 +192,7 @@ class Client extends Configurable
     }
 
     /**
-     * Receives data sent by the server
+     * Receives data sent by the server.
      *
      * @return array<Payload> Payload received since the last call to receive()
      */
@@ -209,15 +211,17 @@ class Client extends Configurable
         $this->payloadHandler->handle($data);
         $received = $this->received;
         $this->received = [];
+
         return $received;
     }
 
     /**
-     * Connect to the server
+     * Connect to the server.
      *
-     * @return bool Whether a new connection was made
      * @throws Exception\HandshakeException
      * @throws Exception\SocketException
+     *
+     * @return bool Whether a new connection was made
      */
     public function connect(): bool
     {
@@ -241,21 +245,24 @@ class Client extends Configurable
 
         $this->socket->send($handshake);
         $response = $this->socket->receive(self::MAX_HANDSHAKE_RESPONSE);
-        return ($this->connected =
-            $this->protocol->validateResponseHandshake($response, $key));
+
+        return $this->connected =
+            $this->protocol->validateResponseHandshake($response, $key);
     }
 
     /**
-     * Disconnects the underlying socket, and marks the client as disconnected
+     * Disconnects the underlying socket, and marks the client as disconnected.
      *
      * @param int $reason Reason for disconnecting. See Protocol::CLOSE_
-     * @return bool
+     *
      * @throws Exception\SocketException
      * @throws FrameException
+     *
+     * @return bool
      */
     public function disconnect($reason = Protocol::CLOSE_NORMAL): bool
     {
-        if ($this->connected === false) {
+        if (false === $this->connected) {
             return false;
         }
 
@@ -263,7 +270,7 @@ class Client extends Configurable
 
         if ($this->socket) {
             if (!$payload->sendToSocket($this->socket)) {
-                throw new FrameException("Unexpected exception when sending Close frame.");
+                throw new FrameException('Unexpected exception when sending Close frame.');
             }
             // The client SHOULD wait for the server to close the connection
             $this->socket->receive();
@@ -276,14 +283,15 @@ class Client extends Configurable
     }
 
     /**
-     * Configure options
+     * Configure options.
      *
      * @param array $options
+     *
      * @return void
      */
     protected function configure(array $options): void
     {
-        $options = array_merge([
+        $options = \array_merge([
             'socket_class' => ClientSocket::class,
             'on_data_callback' => null,
             'socket_options' => [],

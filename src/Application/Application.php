@@ -13,10 +13,11 @@ use Wrench\Connection;
 abstract class Application implements DataHandlerInterface
 {
     /**
-     * Handle data received from a client
+     * Handle data received from a client.
      *
      * @param string     $data
      * @param Connection $connection
+     *
      * @return void
      */
     abstract public function onData(string $data, Connection $connection): void;

@@ -19,16 +19,18 @@ class StatusApplication implements ConnectionHandlerInterface
 
     /**
      * @param string $action
-     * @param array $data
+     * @param array  $data
+     *
      * @return string
      */
     private function _encodeData($action, $data)
     {
-        return json_encode(['action' => $action, 'data' => $data]);
+        return \json_encode(['action' => $action, 'data' => $data]);
     }
 
     /**
      * @param Connection $client
+     *
      * @throws \Wrench\Exception\ConnectionException
      * @throws \Wrench\Exception\HandshakeException
      */
@@ -42,18 +44,20 @@ class StatusApplication implements ConnectionHandlerInterface
 
     /**
      * @param Connection $client
-     * @return bool
+     *
      * @throws \Wrench\Exception\ConnectionException
      * @throws \Wrench\Exception\HandshakeException
+     *
+     * @return bool
      */
     private function _sendServerinfo($client)
     {
-        if (count($this->_clients) < 1) {
+        if (\count($this->_clients) < 1) {
             return false;
         }
 
         $currentServerInfo = $this->_serverInfo;
-        $currentServerInfo['clientCount'] = count($this->_serverClients);
+        $currentServerInfo['clientCount'] = \count($this->_serverClients);
         $currentServerInfo['clients'] = $this->_serverClients;
         $encodedData = $this->_encodeData('serverInfo', $currentServerInfo);
 
@@ -72,19 +76,20 @@ class StatusApplication implements ConnectionHandlerInterface
 
     public function setServerInfo($serverInfo)
     {
-        if (is_array($serverInfo)) {
+        if (\is_array($serverInfo)) {
             $this->_serverInfo = $serverInfo;
+
             return true;
         }
 
         return false;
     }
 
-    public function clientConnected($ip, $port)
+    public function clientConnected($ip, $port): void
     {
         $this->_serverClients[$port] = $ip;
-        $this->_serverClientCount++;
-        $this->statusMsg('Client connected: ' . $ip . ':' . $port);
+        ++$this->_serverClientCount;
+        $this->statusMsg('Client connected: '.$ip.':'.$port);
 
         $data = [
             'ip' => $ip,
@@ -100,11 +105,11 @@ class StatusApplication implements ConnectionHandlerInterface
     /**
      * @param string $text
      */
-    public function statusMsg($text, $type = 'info')
+    public function statusMsg($text, $type = 'info'): void
     {
         $data = [
             'type' => $type,
-            'text' => '[' . strftime('%m-%d %H:%M', time()) . '] ' . $text,
+            'text' => '['.\strftime('%m-%d %H:%M', \time()).'] '.$text,
         ];
 
         $encodedData = $this->_encodeData('statusMsg', $data);
@@ -114,7 +119,7 @@ class StatusApplication implements ConnectionHandlerInterface
 
     private function _sendAll($encodedData)
     {
-        if (count($this->_clients) < 1) {
+        if (\count($this->_clients) < 1) {
             return false;
         }
 
@@ -131,8 +136,8 @@ class StatusApplication implements ConnectionHandlerInterface
 
         unset($this->_serverClients[$port]);
 
-        $this->_serverClientCount--;
-        $this->statusMsg('Client disconnected: ' . $ip . ':' . $port);
+        --$this->_serverClientCount;
+        $this->statusMsg('Client disconnected: '.$ip.':'.$port);
 
         $data = [
             'port' => $port,
@@ -144,7 +149,7 @@ class StatusApplication implements ConnectionHandlerInterface
         $this->_sendAll($encodedData);
     }
 
-    public function clientActivity($port)
+    public function clientActivity($port): void
     {
         $encodedData = $this->_encodeData('clientActivity', $port);
         $this->_sendAll($encodedData);

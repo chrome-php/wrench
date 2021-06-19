@@ -25,7 +25,6 @@ use Wrench\Util\NullLoop;
  */
 class Server extends Configurable implements LoggerAwareInterface
 {
-
     use LoggerAwareTrait {
         setLogger as private traitSetLogger;
     }
@@ -35,22 +34,22 @@ class Server extends Configurable implements LoggerAwareInterface
      *
      * @var string
      */
-    const EVENT_SOCKET_CONNECT = 'socket_connect';
-    const EVENT_SOCKET_DISCONNECT = 'socket_disconnect';
-    const EVENT_HANDSHAKE_REQUEST = 'handshake_request';
-    const EVENT_HANDSHAKE_SUCCESSFUL = 'handshake_successful';
-    const EVENT_CLIENT_DATA = 'client_data';
+    public const EVENT_SOCKET_CONNECT = 'socket_connect';
+    public const EVENT_SOCKET_DISCONNECT = 'socket_disconnect';
+    public const EVENT_HANDSHAKE_REQUEST = 'handshake_request';
+    public const EVENT_HANDSHAKE_SUCCESSFUL = 'handshake_successful';
+    public const EVENT_CLIENT_DATA = 'client_data';
     /**#@-*/
 
     /**
-     * The URI of the server
+     * The URI of the server.
      *
      * @var string
      */
     protected $uri;
 
     /**
-     * Options
+     * Options.
      *
      * @var array
      */
@@ -65,7 +64,7 @@ class Server extends Configurable implements LoggerAwareInterface
     protected $listeners = [];
 
     /**
-     * Connection manager
+     * Connection manager.
      *
      * @var ConnectionManager
      */
@@ -77,14 +76,14 @@ class Server extends Configurable implements LoggerAwareInterface
     protected $loop;
 
     /**
-     * Applications
+     * Applications.
      *
      * @var array<string => Application>
      */
     protected $applications = [];
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param string $uri     Websocket URI, e.g. ws://localhost:8000/, path will
      *                        be ignored
@@ -100,7 +99,7 @@ class Server extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Gets the connection manager
+     * Gets the connection manager.
      *
      * @return ConnectionManager
      */
@@ -123,7 +122,7 @@ class Server extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Main server loop
+     * Main server loop.
      *
      * @return void This method does not return!
      */
@@ -145,7 +144,7 @@ class Server extends Configurable implements LoggerAwareInterface
              * be implemented in the 'onUpdate' method.
              */
             foreach ($this->applications as $application) {
-                if (method_exists($application, 'onUpdate')) {
+                if (\method_exists($application, 'onUpdate')) {
                     $application->onUpdate();
                 }
             }
@@ -153,10 +152,11 @@ class Server extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Notifies listeners of an event
+     * Notifies listeners of an event.
      *
      * @param string $event
      * @param array  $arguments Event arguments
+     *
      * @return void
      */
     public function notify($event, array $arguments = []): void
@@ -166,7 +166,7 @@ class Server extends Configurable implements LoggerAwareInterface
         }
 
         foreach ($this->listeners[$event] as $listener) {
-            call_user_func_array($listener, $arguments);
+            \call_user_func_array($listener, $arguments);
         }
     }
 
@@ -178,8 +178,10 @@ class Server extends Configurable implements LoggerAwareInterface
      *
      * @param string   $event
      * @param callable $callback
-     * @return void
+     *
      * @throws InvalidArgumentException
+     *
+     * @return void
      */
     public function addListener($event, callable $callback): void
     {
@@ -187,7 +189,7 @@ class Server extends Configurable implements LoggerAwareInterface
             $this->listeners[$event] = [];
         }
 
-        if (!is_callable($callback)) {
+        if (!\is_callable($callback)) {
             throw new InvalidArgumentException('Invalid listener');
         }
 
@@ -197,8 +199,9 @@ class Server extends Configurable implements LoggerAwareInterface
     /**
      * Returns a server application.
      *
-     * @param string $key Name of application.
-     * @return null|DataHandlerInterface|ConnectionHandlerInterface|UpdateHandlerInterface The application object
+     * @param string $key name of application
+     *
+     * @return DataHandlerInterface|ConnectionHandlerInterface|UpdateHandlerInterface|null The application object
      */
     public function getApplication($key)
     {
@@ -206,7 +209,7 @@ class Server extends Configurable implements LoggerAwareInterface
             return null;
         }
 
-        if (array_key_exists($key, $this->applications)) {
+        if (\array_key_exists($key, $this->applications)) {
             return $this->applications[$key];
         }
 
@@ -216,17 +219,18 @@ class Server extends Configurable implements LoggerAwareInterface
     /**
      * Adds a new application object to the application storage.
      *
-     * @param string                                                                 $key         Name of application.
+     * @param string                                                                 $key         name of application
      * @param DataHandlerInterface|ConnectionHandlerInterface|UpdateHandlerInterface $application The application object
+     *
      * @return void
      */
-    public function registerApplication($key, $application)
+    public function registerApplication($key, $application): void
     {
         $this->applications[$key] = $application;
     }
 
     /**
-     * Configure options
+     * Configure options.
      *
      * Options include
      *   - socket_class      => The socket class to use, defaults to ServerSocket
@@ -235,11 +239,12 @@ class Server extends Configurable implements LoggerAwareInterface
      *                                 for logging
      *
      * @param array $options
+     *
      * @return void
      */
     protected function configure(array $options): void
     {
-        $options = array_merge([
+        $options = \array_merge([
             'connection_manager' => null,
             'connection_manager_class' => ConnectionManager::class,
             'connection_manager_options' => [],
@@ -259,7 +264,7 @@ class Server extends Configurable implements LoggerAwareInterface
      *
      * @param LoggerInterface $logger
      */
-    public function setLogger(LoggerInterface $logger)
+    public function setLogger(LoggerInterface $logger): void
     {
         // calling "parent" setLogger
         $this->traitSetLogger($logger);
@@ -268,7 +273,7 @@ class Server extends Configurable implements LoggerAwareInterface
     }
 
     /**
-     * Configures the connection manager
+     * Configures the connection manager.
      *
      * @return void
      */

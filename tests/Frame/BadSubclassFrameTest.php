@@ -7,7 +7,7 @@ use Wrench\Test\BaseTest;
 
 class BadSubclassFrameTest extends BaseTest
 {
-    public function testInvalidFrameBuffer()
+    public function testInvalidFrameBuffer(): void
     {
         $frame = new BadSubclassFrame();
 

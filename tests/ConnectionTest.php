@@ -11,12 +11,12 @@ use Wrench\Socket\Socket;
 use Wrench\Test\BaseTest;
 
 /**
- * Tests the Connection class
+ * Tests the Connection class.
  */
 class ConnectionTest extends BaseTest
 {
     /**
-     * Tests the constructor
+     * Tests the constructor.
      *
      * @dataProvider getValidConstructorArguments
      */
@@ -38,7 +38,7 @@ class ConnectionTest extends BaseTest
      * @dataProvider getValidCloseCodes
      * @doesNotPerformAssertions
      */
-    public function testClose($code)
+    public function testClose($code): void
     {
         $socket = $this->getMockSocket();
 
@@ -48,7 +48,7 @@ class ConnectionTest extends BaseTest
 
         $socket->expects($this->any())
             ->method('getPort')
-            ->will($this->returnValue(random_int(1025, 50000)));
+            ->will($this->returnValue(\random_int(1025, 50000)));
 
         $manager = $this->getMockConnectionManager();
 
@@ -57,7 +57,7 @@ class ConnectionTest extends BaseTest
     }
 
     /**
-     * Gets a mock socket
+     * Gets a mock socket.
      *
      * @return \PHPUnit_Framework_MockObject_MockObject|Socket
      */
@@ -68,8 +68,6 @@ class ConnectionTest extends BaseTest
             ->disableOriginalConstructor()
             ->getMock();
     }
-
-
 
     /**
      * @dataProvider getValidHandshakeData
@@ -85,7 +83,7 @@ class ConnectionTest extends BaseTest
         $connection->handshake($request);
 
         $headers = $connection->getHeaders();
-        $this->assertEquals(array_change_key_case(['X-Some-Header' => 'Some Value']), $headers, 'Extra headers returned');
+        $this->assertEquals(\array_change_key_case(['X-Some-Header' => 'Some Value']), $headers, 'Extra headers returned');
 
         $params = $connection->getQueryParams();
         $this->assertEquals(['someparam' => 'someval'], $params, 'Query string parameters returned');
@@ -120,7 +118,7 @@ class ConnectionTest extends BaseTest
     }
 
     /**
-     * Gets a mock application
+     * Gets a mock application.
      *
      * @return \PHPUnit_Framework_MockObject_MockObject|DataHandlerInterface
      */
@@ -150,7 +148,7 @@ class ConnectionTest extends BaseTest
     /**
      * @dataProvider getValidHandshakeData
      */
-    public function testHandshakeBadSocket($path, $request)
+    public function testHandshakeBadSocket($path, $request): void
     {
         $connection = $this->getConnectionForHandshake(
             $this->getNotConnectedSocket(),
@@ -178,11 +176,11 @@ class ConnectionTest extends BaseTest
     }
 
     /**
-     * Because expectation is that only $path application is available
+     * Because expectation is that only $path application is available.
      *
      * @dataProvider getWrongPathHandshakeData
      */
-    public function testWrongPathHandshake($path, $request)
+    public function testWrongPathHandshake($path, $request): void
     {
         $connection = $this->getConnectionForHandshake(
             $this->getConnectedSocket(),
@@ -252,7 +250,7 @@ class ConnectionTest extends BaseTest
     }
 
     /**
-     * Data provider
+     * Data provider.
      *
      * @return array<array<int>>
      */
@@ -262,11 +260,12 @@ class ConnectionTest extends BaseTest
         foreach (Protocol::CLOSE_REASONS as $code => $reason) {
             $arguments[] = [$code];
         }
+
         return $arguments;
     }
 
     /**
-     * Data provider
+     * Data provider.
      *
      * @return array<array<mixed>>
      */
@@ -280,7 +279,7 @@ class ConnectionTest extends BaseTest
 
         $socket->expects($this->any())
             ->method('getPort')
-            ->will($this->returnValue(random_int(1025, 50000)));
+            ->will($this->returnValue(\random_int(1025, 50000)));
 
         $manager = $this->getMockConnectionManager();
 
@@ -288,21 +287,21 @@ class ConnectionTest extends BaseTest
             [
                 $manager,
                 $socket,
-                ['logger' => function () {
+                ['logger' => function (): void {
                 }],
             ],
             [
                 $manager,
                 $socket,
-                ['logger' => function () {
+                ['logger' => function (): void {
                 },
-                    'connection_id_algo' => 'sha512'],
+                    'connection_id_algo' => 'sha512', ],
             ],
         ];
     }
 
     /**
-     * Data provider
+     * Data provider.
      *
      * Uses this awkward valid request array so that splitting of payloads
      * across multiple calls to handle can be tested
@@ -315,14 +314,14 @@ class ConnectionTest extends BaseTest
             [
                 'data' => [
                     "\x81\xad\x2e\xab\x82\xac\x6f\xfe\xd6\xe4\x14\x8b\xf9\x8c\x0c"
-                    . "\xde\xf1\xc9\x5c\xc5\xe3\xc1\x4b\x89\xb8\x8c\x0c\xcd\xed\xc3"
-                    . "\x0c\x87\xa2\x8e\x5e\xca\xf1\xdf\x59\xc4\xf0\xc8\x0c\x91\xa2"
-                    . "\x8e\x4c\xca\xf0\x8e\x53\x81\xad\xd4\xfd\x81\xfe\x95\xa8\xd5"
-                    . "\xb6\xee\xdd\xfa\xde\xf6\x88\xf2\x9b\xa6\x93\xe0\x93\xb1\xdf"
-                    . "\xbb\xde\xf6\x9b\xee\x91\xf6\xd1\xa1\xdc\xa4\x9c\xf2\x8d\xa3"
-                    . "\x92\xf3\x9a\xf6\xc7\xa1\xdc\xb6\x9c\xf3\xdc\xa9\x81\x80\x8e"
-                    . "\x12\xcd\x8e\x81\x8c\xf6\x8a\xf0\xee\x9a\xeb\x83\x9a\xd6\xe7"
-                    . "\x95\x9d\x85\xeb\x97\x8b" // Four text frames
+                    ."\xde\xf1\xc9\x5c\xc5\xe3\xc1\x4b\x89\xb8\x8c\x0c\xcd\xed\xc3"
+                    ."\x0c\x87\xa2\x8e\x5e\xca\xf1\xdf\x59\xc4\xf0\xc8\x0c\x91\xa2"
+                    ."\x8e\x4c\xca\xf0\x8e\x53\x81\xad\xd4\xfd\x81\xfe\x95\xa8\xd5"
+                    ."\xb6\xee\xdd\xfa\xde\xf6\x88\xf2\x9b\xa6\x93\xe0\x93\xb1\xdf"
+                    ."\xbb\xde\xf6\x9b\xee\x91\xf6\xd1\xa1\xdc\xa4\x9c\xf2\x8d\xa3"
+                    ."\x92\xf3\x9a\xf6\xc7\xa1\xdc\xb6\x9c\xf3\xdc\xa9\x81\x80\x8e"
+                    ."\x12\xcd\x8e\x81\x8c\xf6\x8a\xf0\xee\x9a\xeb\x83\x9a\xd6\xe7"
+                    ."\x95\x9d\x85\xeb\x97\x8b", // Four text frames
                 ],
                 'counts' => [
                     'onData' => 4,
@@ -330,7 +329,7 @@ class ConnectionTest extends BaseTest
             ],
             [
                 'data' => [
-                    "\x88\x80\xdc\x8e\xa2\xc5" // Close frame
+                    "\x88\x80\xdc\x8e\xa2\xc5", // Close frame
                 ],
                 'counts' => [
                     'removeConnection' => 1,
@@ -356,7 +355,7 @@ class ConnectionTest extends BaseTest
     }
 
     /**
-     * Data provider
+     * Data provider.
      */
     public function getValidHandshakeData()
     {
@@ -376,7 +375,7 @@ Sec-WebSocket-Version: 13\r\n\r\n",
     }
 
     /**
-     * Data provider
+     * Data provider.
      */
     public function getWrongPathHandshakeData()
     {

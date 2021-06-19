@@ -6,18 +6,18 @@ use Wrench\Test\BaseTest;
 use Wrench\Util\LoopInterface;
 
 /**
- * Tests the Server class
+ * Tests the Server class.
  */
 class ServerTest extends BaseTest
 {
     /**
-     * Tests the constructor
+     * Tests the constructor.
      *
      * @param string $url
      * @param array  $options
      * @dataProvider getValidConstructorArguments
      */
-    public function testConstructor($url, array $options = [])
+    public function testConstructor($url, array $options = []): void
     {
         $this->assertInstanceOfClass(
             $this->getInstance($url, $options),
@@ -26,7 +26,7 @@ class ServerTest extends BaseTest
     }
 
     /**
-     * Data provider
+     * Data provider.
      *
      * @return array<array<mixed>>
      */
@@ -43,18 +43,17 @@ class ServerTest extends BaseTest
         ];
     }
 
-    public function testLoop()
+    public function testLoop(): void
     {
         /**
-         * A simple loop that only runs 5 times
+         * A simple loop that only runs 5 times.
          */
-        $countLoop = new class implements LoopInterface
-        {
+        $countLoop = new class() implements LoopInterface {
             public $count = 0;
 
             public function shouldContinue(): bool
             {
-                return ($this->count++ < 5);
+                return $this->count++ < 5;
             }
         };
 

@@ -13,7 +13,7 @@ class BadRequestException extends HandshakeException
      */
     public function __construct($message = null, $code = null, $previous = null)
     {
-        if ($code == null) {
+        if (null == $code) {
             $code = Protocol::HTTP_BAD_REQUEST;
         }
         parent::__construct($message, $code, $previous);
