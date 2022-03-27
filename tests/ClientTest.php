@@ -101,7 +101,7 @@ class ClientTest extends BaseTest
 
             $this->assertFalse($instance->connect(), 'Double connect');
 
-            $this->assertFalse((bool) $instance->receive(), 'No data');
+            $this->assertSame([], $instance->receive(), 'No data');
 
             $bytes = $instance->sendData('foobar', Protocol::TYPE_TEXT);
             $this->assertTrue($bytes >= 6, 'sent text frame');
