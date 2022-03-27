@@ -90,11 +90,6 @@ abstract class PayloadBaseTest extends BaseTest
      */
     public function testSendToSocket($type, $payload): void
     {
-//        $successfulSocket = $this->getMockBuilder(ClientSocket::class)
-//            ->setMethods(['send'])
-//            ->setConstructorArgs(['wss://localhost:8000'])
-//            ->getMock();
-
         $socket = $this->getMockBuilder(ClientSocket::class)
             ->setMethods(['getIp', 'getPort', 'isConnected', 'send'])
             ->disableOriginalConstructor()

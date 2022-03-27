@@ -28,17 +28,13 @@ class ServerTestHelper implements LoggerAwareInterface
         $this->logger = new NullLogger();
     }
 
-    /**
-     * Destructor.
-     */
     public function __destruct()
     {
         $this->tearDown();
     }
 
     /**
-     * Tears down the server process
-     * This method *must* be called.
+     * Tears down the server process.
      */
     public function tearDown(): void
     {
@@ -86,29 +82,12 @@ class ServerTestHelper implements LoggerAwareInterface
         }
     }
 
-    /**
-     * Logs a message.
-     *
-     * @param string $message
-     * @param string $priority
-     */
-    public function log($message, $priority = 'info'): void
-    {
-        // echo $message . "\n";
-    }
-
-    /**
-     * @return string
-     */
-    public function getEchoConnectionString()
+    public function getEchoConnectionString(): string
     {
         return $this->getConnectionString().'/echo';
     }
 
-    /**
-     * @return string
-     */
-    public function getConnectionString()
+    public function getConnectionString(): string
     {
         return 'ws://localhost:'.$this->port;
     }
@@ -141,7 +120,7 @@ class ServerTestHelper implements LoggerAwareInterface
     /**
      * Gets the next available port number to start a server on.
      */
-    public static function getNextPort()
+    public static function getNextPort(): int
     {
         if (null === self::$nextPort) {
             self::$nextPort = \mt_rand(self::TEST_SERVER_PORT_MIN, self::TEST_SERVER_PORT_MAX);
@@ -152,10 +131,8 @@ class ServerTestHelper implements LoggerAwareInterface
 
     /**
      * Gets the server command.
-     *
-     * @return string
      */
-    protected function getCommand()
+    protected function getCommand(): string
     {
         return \sprintf('/usr/bin/env php %s/server.php %d', __DIR__, $this->port);
     }
