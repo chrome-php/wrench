@@ -251,9 +251,11 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
                     $makeBlockingAfterRead = false;
                 }
 
-                if (false !== $result) {
-                    $buffer .= $result;
+                if (false === $result) {
+                    return $buffer;
                 }
+
+                $buffer .= $result;
 
                 // feof means socket has been closed
                 if (\feof($this->socket)) {
