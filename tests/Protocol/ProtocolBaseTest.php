@@ -95,7 +95,7 @@ abstract class ProtocolBaseTest extends BaseTest
     {
         try {
             $valid = self::getInstance()->validateOriginUri($uri);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->fail('Valid URI validated as invalid: '.$e);
         }
     }
