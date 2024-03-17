@@ -1,6 +1,11 @@
 # CHANGELOG
 
 
+## 1.6.0 (2024-03-17)
+
+* Add support for PHP 8.3
+
+
 ## 1.5.0 (2023-03-11)
 
 * Made response header parsing more robust
