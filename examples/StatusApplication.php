@@ -109,7 +109,7 @@ class StatusApplication implements ConnectionHandlerInterface
     {
         $data = [
             'type' => $type,
-            'text' => '['.\strftime('%m-%d %H:%M', \time()).'] '.$text,
+            'text' => '['.\date('m-d H:i', \time()).'] '.$text,
         ];
 
         $encodedData = $this->_encodeData('statusMsg', $data);
