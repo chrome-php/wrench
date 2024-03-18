@@ -292,7 +292,7 @@ class Client extends Configurable
      *
      * @param float $maxSeconds the maximum amount of time to wait for data, in seconds
      *
-     * @return ?bool Returns true if data is available, false if the wait timed out, and null on error.
+     * @return ?bool returns true if data is available, false if the wait timed out, and null on error
      */
     public function waitForData(float $maxSeconds): ?bool
     {
