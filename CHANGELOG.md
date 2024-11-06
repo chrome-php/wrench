@@ -1,7 +1,7 @@
 # CHANGELOG
 
 
-## 1.7.0 (UPCOMING)
+## 1.7.0 (2024-11-06)
 
 * Add `Client::getSocketResource` method
 * Add support for PHP 8.4
