@@ -6,6 +6,8 @@ use Wrench\Util\Ssl;
 
 class SslTest extends BaseTest
 {
+    private $tmp;
+
     public function setUp(): void
     {
         parent::setUp();
