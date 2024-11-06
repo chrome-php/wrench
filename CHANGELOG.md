@@ -1,6 +1,11 @@
 # CHANGELOG
 
 
+## 1.6.1 (UPCOMING)
+
+* Add support for PHP 8.4
+
+
 ## 1.6.0 (2024-03-17)
 
 * Add support for PHP 8.3
