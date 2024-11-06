@@ -15,7 +15,7 @@ The library can be installed with Composer and is available on Packagist under
 $ composer require chrome-php/wrench
 ```
 
-PHP 7.4-8.3 are currently supported, only.
+PHP 7.4-8.4 are currently supported, only.
 
 
 ## Usage
