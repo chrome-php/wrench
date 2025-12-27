@@ -1,6 +1,11 @@
 # CHANGELOG
 
 
+## 1.8.0 (UPCOMING)
+
+* Add support for PHP 8.5
+
+
 ## 1.7.1 (2025-05-01)
 
 * Fix size 65536 HybiFrames
