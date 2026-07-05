@@ -1,7 +1,8 @@
-*.sw[m-p]
-.phpunit.result.cache
-composer.lock
-phpstan.neon
-phpunit.xml
+/.claude
+/*.sw[m-p]
+/.phpunit.result.cache
+/composer.lock
+/phpstan.neon
+/phpunit.xml
 vendor
 examples/generated.pem
