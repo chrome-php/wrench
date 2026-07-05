@@ -132,6 +132,8 @@ Origin: http://localhost\r
 Sec-WebSocket-Version: 13\r\n\r\n");
             self::assertNotEquals(false, $sent, 'Client socket can send to test server');
 
+            self::assertTrue($instance->waitForData(AbstractSocket::TIMEOUT_SOCKET), 'Data arrives from test server');
+
             $response = $instance->receive();
             self::assertStringStartsWith('HTTP', $response, 'Response looks like HTTP handshake response');
         } catch (\Exception $e) {

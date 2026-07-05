@@ -225,6 +225,33 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
     }
 
     /**
+     * Waits for data to become available on the socket.
+     *
+     * @param float $maxSeconds the maximum amount of time to wait for data, in seconds
+     *
+     * @return ?bool returns true if data is available, false if the wait timed out, and null on error
+     */
+    public function waitForData(float $maxSeconds): ?bool
+    {
+        $read = [$this->socket];
+        $write = null;
+        $except = null;
+        $seconds = (int) \floor($maxSeconds);
+        $microseconds = (int) (($maxSeconds - $seconds) * 1e6);
+        $result = @\stream_select($read, $write, $except, $seconds, $microseconds);
+        if (false === $result) {
+            // An error occurred. stream_select() probably triggered an error internally.
+            return null;
+        } elseif (0 === $result) {
+            // Timeout occurred, no data available
+            return false;
+        }
+
+        // Data is available
+        return true;
+    }
+
+    /**
      * Receive data from the socket.
      */
     public function receive(int $length = self::DEFAULT_RECEIVE_LENGTH): string
@@ -242,8 +269,19 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
 
                     return $buffer;
                 }
-
-                $result = \fread($this->socket, $length);
+                // poll before reading so that an empty socket returns immediately instead
+                // of blocking until the socket timeout; callers that expect a reply must
+                // wait for data to arrive before reading, as the handshake does
+                $readArray = [$this->socket];
+                $writeArray = null;
+                $exceptArray = null;
+                $selectResult = \stream_select($readArray, $writeArray, $exceptArray, 0);
+                // 1 means there is data to read, false means we were unable to check if there is data to read
+                if (1 === $selectResult || false === $selectResult) {
+                    $result = \fread($this->socket, $length);
+                } else {
+                    $result = false;
+                }
 
                 if ($makeBlockingAfterRead) {
                     \stream_set_blocking($this->socket, true);

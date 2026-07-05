@@ -237,6 +237,10 @@ class Client extends Configurable
         );
 
         $this->socket->send($handshake);
+
+        // wait for the response to arrive, since receive() does not block waiting for data
+        $this->waitForData(ClientSocket::TIMEOUT_SOCKET);
+
         $response = $this->socket->receive(self::MAX_HANDSHAKE_RESPONSE);
 
         return $this->connected =
@@ -296,21 +300,6 @@ class Client extends Configurable
      */
     public function waitForData(float $maxSeconds): ?bool
     {
-        $read = [$this->socket->getResource()];
-        $write = null;
-        $except = null;
-        $seconds = (int) \floor($maxSeconds);
-        $microseconds = (int) (($maxSeconds - $seconds) * 1e6);
-        $result = \stream_select($read, $write, $except, $seconds, $microseconds);
-        if (false === $result) {
-            // An error occurred. stream_select() probably triggered an error internally.
-            return null;
-        } elseif (0 === $result) {
-            // Timeout occurred, no data available
-            return false;
-        }
-
-        // Data is available
-        return true;
+        return $this->socket->waitForData($maxSeconds);
     }
 }

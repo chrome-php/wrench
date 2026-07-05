@@ -35,4 +35,31 @@ class ServerClientSocketTest extends SocketBaseTest
 
         $instance->getPort();
     }
+
+    public function testReceiveReturnsImmediatelyWhenNoDataIsAvailable(): void
+    {
+        [$local, $remote] = \stream_socket_pair(\STREAM_PF_UNIX, \STREAM_SOCK_STREAM, \STREAM_IPPROTO_IP);
+        $instance = self::getInstance($local);
+
+        $start = \microtime(true);
+        $received = $instance->receive();
+
+        self::assertSame('', $received);
+        self::assertLessThan(2, \microtime(true) - $start, 'receive did not block on an empty socket');
+
+        \fclose($remote);
+    }
+
+    public function testReceiveReturnsDataAlreadyAvailable(): void
+    {
+        [$local, $remote] = \stream_socket_pair(\STREAM_PF_UNIX, \STREAM_SOCK_STREAM, \STREAM_IPPROTO_IP);
+        $sent = \str_repeat('a', 2 * AbstractSocket::DEFAULT_RECEIVE_LENGTH);
+        \fwrite($remote, $sent);
+
+        $instance = self::getInstance($local);
+
+        self::assertSame($sent, $instance->receive());
+
+        \fclose($remote);
+    }
 }
