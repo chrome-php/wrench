@@ -116,7 +116,8 @@ class ClientTest extends BaseTest
 
             $bytes = $instance->sendData('baz', Protocol::TYPE_TEXT);
             self::assertTrue($bytes >= 3, 'sent text frame');
-
+            self::assertSame([], $instance->receive(), 'Instantly recieve after send');
+            \usleep(500000);
             // test fix for issue #43
             $responses = $instance->receive();
             self::assertTrue(\is_array($responses));

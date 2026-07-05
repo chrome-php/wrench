@@ -57,6 +57,13 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
     protected $name;
 
     /**
+     * Whether we have ran fread() on the socket at least once.
+     *
+     * @var bool
+     */
+    private $hasBeenFreadInitialized = false;
+
+    /**
      * Gets the IP address of the socket.
      *
      * @throws \Wrench\Exception\SocketException If the IP address cannot be obtained
@@ -242,8 +249,22 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
 
                     return $buffer;
                 }
-
-                $result = \fread($this->socket, $length);
+                if (!$this->hasBeenFreadInitialized) {
+                    // stream_select() may erroneously return 0 before the first fread() (observed on PHP8.4.12 Ubuntu24.04 chrome-php/wrench1.8.0)
+                    $this->hasBeenFreadInitialized = true;
+                    $selectResult = 1;
+                } else {
+                    $readArray = [$this->socket];
+                    $writeArray = null;
+                    $exceptArray = null;
+                    $selectResult = \stream_select($readArray, $writeArray, $exceptArray, 0);
+                }
+                // 1 means there is data to read, false means we were unable to check if there is data to read
+                if (1 === $selectResult || false === $selectResult) {
+                    $result = \fread($this->socket, $length);
+                } else {
+                    $result = false;
+                }
 
                 if ($makeBlockingAfterRead) {
                     \stream_set_blocking($this->socket, true);
