@@ -57,13 +57,6 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
     protected $name;
 
     /**
-     * Whether we have ran fread() on the socket at least once.
-     *
-     * @var bool
-     */
-    private $hasBeenFreadInitialized = false;
-
-    /**
      * Gets the IP address of the socket.
      *
      * @throws \Wrench\Exception\SocketException If the IP address cannot be obtained
@@ -232,6 +225,33 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
     }
 
     /**
+     * Waits for data to become available on the socket.
+     *
+     * @param float $maxSeconds the maximum amount of time to wait for data, in seconds
+     *
+     * @return ?bool returns true if data is available, false if the wait timed out, and null on error
+     */
+    public function waitForData(float $maxSeconds): ?bool
+    {
+        $read = [$this->socket];
+        $write = null;
+        $except = null;
+        $seconds = (int) \floor($maxSeconds);
+        $microseconds = (int) (($maxSeconds - $seconds) * 1e6);
+        $result = @\stream_select($read, $write, $except, $seconds, $microseconds);
+        if (false === $result) {
+            // An error occurred. stream_select() probably triggered an error internally.
+            return null;
+        } elseif (0 === $result) {
+            // Timeout occurred, no data available
+            return false;
+        }
+
+        // Data is available
+        return true;
+    }
+
+    /**
      * Receive data from the socket.
      */
     public function receive(int $length = self::DEFAULT_RECEIVE_LENGTH): string
@@ -249,16 +269,13 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
 
                     return $buffer;
                 }
-                if (!$this->hasBeenFreadInitialized) {
-                    // stream_select() may erroneously return 0 before the first fread() (observed on PHP8.4.12 Ubuntu24.04 chrome-php/wrench1.8.0)
-                    $this->hasBeenFreadInitialized = true;
-                    $selectResult = 1;
-                } else {
-                    $readArray = [$this->socket];
-                    $writeArray = null;
-                    $exceptArray = null;
-                    $selectResult = \stream_select($readArray, $writeArray, $exceptArray, 0);
-                }
+                // poll before reading so that an empty socket returns immediately instead
+                // of blocking until the socket timeout; callers that expect a reply must
+                // wait for data to arrive before reading, as the handshake does
+                $readArray = [$this->socket];
+                $writeArray = null;
+                $exceptArray = null;
+                $selectResult = \stream_select($readArray, $writeArray, $exceptArray, 0);
                 // 1 means there is data to read, false means we were unable to check if there is data to read
                 if (1 === $selectResult || false === $selectResult) {
                     $result = \fread($this->socket, $length);
