@@ -9,6 +9,7 @@ use Wrench\Exception\SocketException;
 use Wrench\Payload\Payload;
 use Wrench\Payload\PayloadHandler;
 use Wrench\Protocol\Protocol;
+use Wrench\Socket\AbstractSocket;
 use Wrench\Socket\ClientSocket;
 use Wrench\Util\Configurable;
 
@@ -187,15 +188,17 @@ class Client extends Configurable
     /**
      * Receives data sent by the server.
      *
+     * @param float $waitSeconds the maximum amount of time to wait for data, in seconds
+     *
      * @return array<Payload> Payload received since the last call to receive()
      */
-    public function receive(): ?array
+    public function receive(float $waitSeconds = 0.0): ?array
     {
         if (!$this->isConnected()) {
             return null;
         }
 
-        $data = $this->socket->receive();
+        $data = $this->socket->receive(AbstractSocket::DEFAULT_RECEIVE_LENGTH, $waitSeconds);
 
         if (!$data) {
             return [];
@@ -239,9 +242,7 @@ class Client extends Configurable
         $this->socket->send($handshake);
 
         // wait for the response to arrive, since receive() does not block waiting for data
-        $this->waitForData(ClientSocket::TIMEOUT_SOCKET);
-
-        $response = $this->socket->receive(self::MAX_HANDSHAKE_RESPONSE);
+        $response = $this->socket->receive(self::MAX_HANDSHAKE_RESPONSE, ClientSocket::TIMEOUT_SOCKET);
 
         return $this->connected =
             $this->protocol->validateResponseHandshake($response, $key);

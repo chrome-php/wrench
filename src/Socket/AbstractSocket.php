@@ -253,9 +253,18 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
 
     /**
      * Receive data from the socket.
+     *
+     * Data that has already arrived is drained without blocking. Pass a wait
+     * time to also wait for up to that many seconds for data to first arrive.
+     *
+     * @param float $waitSeconds the maximum amount of time to wait for data, in seconds
      */
-    public function receive(int $length = self::DEFAULT_RECEIVE_LENGTH): string
+    public function receive(int $length = self::DEFAULT_RECEIVE_LENGTH, float $waitSeconds = 0.0): string
     {
+        if ($waitSeconds > 0) {
+            $this->waitForData($waitSeconds);
+        }
+
         $buffer = '';
         $metadata['unread_bytes'] = 0;
         $makeBlockingAfterRead = false;
