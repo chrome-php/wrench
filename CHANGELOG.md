@@ -1,7 +1,7 @@
 # CHANGELOG
 
 
-## 1.9.2 (Unreleased)
+## 1.9.2 (2026-07-06)
 
 * Reject handshake request lines with a bare line feed ending or a non-literal HTTP version
 * Match `server_ssl_` socket option keys to the true end of input
