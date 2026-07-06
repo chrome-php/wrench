@@ -1,6 +1,11 @@
 # CHANGELOG
 
 
+## 1.8.1 (2026-07-06)
+
+* Prevent blocking on empty `fread()` calls
+
+
 ## 1.8.0 (2025-12-27)
 
 * Add support for PHP 8.5
