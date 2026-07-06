@@ -2,6 +2,8 @@
 
 namespace Wrench\Socket;
 
+use Wrench\Exception\ConnectionException;
+
 /**
  * Options:
  *  - timeout_connect      => int, seconds, default 2.
@@ -44,7 +46,7 @@ class ClientSocket extends UriSocket
         );
 
         if (!$this->socket) {
-            throw new \Wrench\Exception\ConnectionException(\sprintf('Could not connect to socket: %s (%d)', $errstr, $errno));
+            throw new ConnectionException(\sprintf('Could not connect to socket: %s (%d)', $errstr, $errno));
         }
 
         \stream_set_timeout($this->socket, $this->options['timeout_socket']);

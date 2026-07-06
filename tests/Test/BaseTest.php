@@ -2,6 +2,7 @@
 
 namespace Wrench\Test;
 
+use LogicException;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use Wrench\ConnectionManager;
@@ -31,7 +32,7 @@ abstract class BaseTest extends TestCase
             return $matches[1];
         }
 
-        throw new \LogicException('Cannot automatically determine class under test; configure manually by overriding getClass()');
+        throw new LogicException('Cannot automatically determine class under test; configure manually by overriding getClass()');
     }
 
     /**
@@ -44,9 +45,6 @@ abstract class BaseTest extends TestCase
         return $reflection->newInstanceArgs($args);
     }
 
-    /**
-     * @return \PHPUnit_Framework_MockObject_MockObject&ConnectionManager
-     */
     protected function getMockConnectionManager(): ConnectionManager
     {
         return $this->createMock(ConnectionManager::class);

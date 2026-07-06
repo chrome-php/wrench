@@ -16,7 +16,7 @@ class ServerClientSocketTest extends SocketBaseTest
     {
         $instance = self::getInstance(null);
         $connected = $instance->isConnected();
-        self::assertTrue(\is_bool($connected), 'isConnected returns boolean');
+        self::assertIsBool($connected, 'isConnected returns boolean');
         self::assertFalse($connected);
     }
 

@@ -35,9 +35,6 @@ class ClientTest extends BaseTest
         );
     }
 
-    /**
-     * @return \PHPUnit_Framework_MockObject_MockObject&ClientSocket
-     */
     private function getMockSocket(): ClientSocket
     {
         return $this->getMockBuilder(ClientSocket::class)
@@ -109,7 +106,7 @@ class ClientTest extends BaseTest
 
             \usleep(500000);
             $responses = $instance->receive();
-            self::assertTrue(\is_array($responses));
+            self::assertIsArray($responses);
             self::assertCount(2, $responses);
             self::assertInstanceOf(Payload::class, $responses[0]);
             self::assertInstanceOf(Payload::class, $responses[1]);
@@ -120,7 +117,7 @@ class ClientTest extends BaseTest
             \usleep(500000);
             // test fix for issue #43
             $responses = $instance->receive();
-            self::assertTrue(\is_array($responses));
+            self::assertIsArray($responses);
             self::assertCount(1, $responses);
             self::assertInstanceOf(Payload::class, $responses[0]);
 

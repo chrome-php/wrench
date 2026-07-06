@@ -57,7 +57,7 @@ class BasicServerTest extends ServerTest
     }
 
     /**
-     * @see \Wrench\ServerTest::getValidConstructorArguments()
+     * @see ServerTest::getValidConstructorArguments()
      */
     public static function getValidConstructorArguments(): array
     {

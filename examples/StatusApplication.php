@@ -3,6 +3,8 @@
 namespace Wrench\Application;
 
 use Wrench\Connection;
+use Wrench\Exception\ConnectionException;
+use Wrench\Exception\HandshakeException;
 
 /**
  * Shiny WSS Status Application
@@ -31,8 +33,8 @@ class StatusApplication implements ConnectionHandlerInterface
     /**
      * @param Connection $client
      *
-     * @throws \Wrench\Exception\ConnectionException
-     * @throws \Wrench\Exception\HandshakeException
+     * @throws ConnectionException
+     * @throws HandshakeException
      */
     public function onConnect(Connection $client): void
     {
@@ -45,8 +47,8 @@ class StatusApplication implements ConnectionHandlerInterface
     /**
      * @param Connection $client
      *
-     * @throws \Wrench\Exception\ConnectionException
-     * @throws \Wrench\Exception\HandshakeException
+     * @throws ConnectionException
+     * @throws HandshakeException
      *
      * @return bool
      */

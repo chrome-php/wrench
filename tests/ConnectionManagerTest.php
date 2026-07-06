@@ -29,9 +29,6 @@ class ConnectionManagerTest extends BaseTest
         );
     }
 
-    /**
-     * @return \PHPUnit_Framework_MockObject_MockObject&Server
-     */
     private function getMockServer(): Server
     {
         $server = $this->createMock(Server::class);
@@ -47,7 +44,7 @@ class ConnectionManagerTest extends BaseTest
 
     private static function getMockApplication(): DataHandlerInterface
     {
-        return new class() implements DataHandlerInterface {
+        return new class implements DataHandlerInterface {
             public function onData(string $data, Connection $connection): void
             {
                 $connection->send($data);
@@ -62,6 +59,6 @@ class ConnectionManagerTest extends BaseTest
             []
         );
 
-        self::assertTrue(\is_numeric($connectionManager->count()));
+        self::assertIsNumeric($connectionManager->count());
     }
 }

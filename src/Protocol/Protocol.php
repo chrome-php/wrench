@@ -569,9 +569,8 @@ abstract class Protocol
 
         if (empty($headers[self::HEADER_ORIGIN])) {
             throw new BadRequestException('No origin header');
-        } else {
-            unset($extraHeaders[self::HEADER_ORIGIN]);
         }
+        unset($extraHeaders[self::HEADER_ORIGIN]);
 
         $origin = $headers[self::HEADER_ORIGIN];
 
@@ -579,25 +578,22 @@ abstract class Protocol
             || self::UPGRADE_VALUE != \strtolower($headers[self::HEADER_UPGRADE])
         ) {
             throw new BadRequestException('Invalid upgrade header');
-        } else {
-            unset($extraHeaders[self::HEADER_UPGRADE]);
         }
+        unset($extraHeaders[self::HEADER_UPGRADE]);
 
         if (!isset($headers[self::HEADER_CONNECTION])
             || false === \stripos($headers[self::HEADER_CONNECTION], self::CONNECTION_VALUE)
         ) {
             throw new BadRequestException('Invalid connection header');
-        } else {
-            unset($extraHeaders[self::HEADER_CONNECTION]);
         }
+        unset($extraHeaders[self::HEADER_CONNECTION]);
 
         if (!isset($headers[self::HEADER_HOST])) {
             // @todo Validate host == listening socket? Or would that break
             //        TCP proxies?
             throw new BadRequestException('No host header');
-        } else {
-            unset($extraHeaders[self::HEADER_HOST]);
         }
+        unset($extraHeaders[self::HEADER_HOST]);
 
         if (!isset($headers[self::HEADER_VERSION])) {
             throw new BadRequestException('No version header received on handshake request');
@@ -605,9 +601,8 @@ abstract class Protocol
 
         if (!$this->acceptsVersion((int) $headers[self::HEADER_VERSION])) {
             throw new BadRequestException('Unsupported version: '.$headers[self::HEADER_VERSION]);
-        } else {
-            unset($extraHeaders[self::HEADER_VERSION]);
         }
+        unset($extraHeaders[self::HEADER_VERSION]);
 
         if (!isset($headers[self::HEADER_KEY])) {
             throw new BadRequestException('No key header received');
@@ -617,9 +612,8 @@ abstract class Protocol
 
         if (!$key) {
             throw new BadRequestException('Invalid key');
-        } else {
-            unset($extraHeaders[self::HEADER_KEY]);
         }
+        unset($extraHeaders[self::HEADER_KEY]);
 
         // Optional
         $protocol = null;
