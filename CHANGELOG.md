@@ -1,6 +1,12 @@
 # CHANGELOG
 
 
+## 1.9.0 (UPCOMING)
+
+* Prevent blocking empty `fread()`
+* Add an optional wait for data to `receive()`
+
+
 ## 1.8.0 (2025-12-27)
 
 * Add support for PHP 8.5
