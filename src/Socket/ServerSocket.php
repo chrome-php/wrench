@@ -113,7 +113,7 @@ class ServerSocket extends UriSocket
 
         // Otherwise map any options through
         foreach ($this->options as $option => $value) {
-            if (\preg_match('/^server_ssl_(.*)$/', $option, $matches)) {
+            if (\preg_match('/^server_ssl_(.*)$/D', $option, $matches)) {
                 $options[$matches[1]] = $value;
             }
         }

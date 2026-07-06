@@ -4,6 +4,7 @@ namespace Wrench\Protocol;
 
 use Exception;
 use InvalidArgumentException;
+use Wrench\Exception\BadRequestException;
 use Wrench\Test\BaseTest;
 
 abstract class ProtocolBaseTest extends BaseTest
@@ -33,6 +34,16 @@ abstract class ProtocolBaseTest extends BaseTest
         } catch (Exception $e) {
             $this->fail($e);
         }
+    }
+
+    /**
+     * @dataProvider getInvalidHandshakeRequestLines
+     */
+    public function testValidateHandshakeRequestLineInvalid(string $request): void
+    {
+        $this->expectException(BadRequestException::class);
+
+        self::getInstance()->validateRequestHandshake($request);
     }
 
     /**
@@ -158,6 +169,22 @@ Sec-WebSocket-Version: 13\r
 \r\n"];
 
         return $cases;
+    }
+
+    public static function getInvalidHandshakeRequestLines(): array
+    {
+        $headers = "Host: server.example.com\r
+Upgrade: websocket\r
+Connection: Upgrade\r
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r
+Origin: http://example.com\r
+Sec-WebSocket-Version: 13\r
+\r\n";
+
+        return [
+            'bare line feed ending the request line' => ["GET /chat HTTP/1.1\n\r\n".$headers],
+            'non-literal HTTP version' => ["GET /chat HTTP/1x1\r\n".$headers],
+        ];
     }
 
     public static function getValidHandshakeResponses(): array
