@@ -110,6 +110,13 @@ class ClientSocketTest extends UriSocketBaseTest
         $instance->send('foo');
     }
 
+    public function testWaitForDataTooEarly(): void
+    {
+        $instance = self::getInstance('ws://localhost:8000');
+
+        self::assertNull($instance->waitForData(0));
+    }
+
     /**
      * Test the connect, send, receive method.
      */
