@@ -2,6 +2,7 @@
 
 namespace Wrench\Payload;
 
+use Exception;
 use Wrench\Exception\FrameException;
 use Wrench\Exception\PayloadException;
 use Wrench\Exception\SocketException;
@@ -168,9 +169,8 @@ abstract class Payload
         if ($current->isComplete()) {
             if ($current->isFinal()) {
                 throw new PayloadException('Payload cannot receive data: it is already complete');
-            } else {
-                $this->frames[] = $current = $this->getFrame();
             }
+            $this->frames[] = $current = $this->getFrame();
         }
 
         return $current;
@@ -180,7 +180,7 @@ abstract class Payload
     {
         try {
             return $this->getPayload();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // __toString must not throw an exception
             return '';
         }

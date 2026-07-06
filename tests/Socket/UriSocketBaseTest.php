@@ -16,7 +16,7 @@ abstract class UriSocketBaseTest extends SocketBaseTest
     {
         $instance = self::getInstance('ws://localhost:8000');
         $connected = $instance->isConnected();
-        self::assertTrue(\is_bool($connected), 'isConnected returns boolean');
+        self::assertIsBool($connected, 'isConnected returns boolean');
         self::assertFalse($connected);
     }
 

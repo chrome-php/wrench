@@ -39,7 +39,7 @@ class ServerTest extends BaseTest
         /**
          * A simple loop that only runs 5 times.
          */
-        $countLoop = new class() implements LoopInterface {
+        $countLoop = new class implements LoopInterface {
             public $count = 0;
 
             public function shouldContinue(): bool

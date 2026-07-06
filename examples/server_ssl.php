@@ -1,6 +1,12 @@
 #!/usr/bin/env php
 <?php
 
+use Wrench\Application\DataHandlerInterface;
+use Wrench\Application\StatusApplication;
+use Wrench\Connection;
+use Wrench\Server;
+use Wrench\Util\Ssl;
+
 /**
  * Example server.
  *
@@ -29,7 +35,7 @@ $organizationalUnitName = 'none';
 $commonName = '127.0.0.1';
 $emailAddress = 'someone@example.com';
 
-Wrench\Util\Ssl::generatePEMFile(
+Ssl::generatePEMFile(
     $pemFile,
     $pemPassphrase,
     $countryName,
@@ -42,7 +48,7 @@ Wrench\Util\Ssl::generatePEMFile(
 );
 
 // User can use tls in place of ssl
-$server = new Wrench\Server('wss://127.0.0.1:8000/', [
+$server = new Server('wss://127.0.0.1:8000/', [
     'connection_manager_options' => [
         'socket_master_options' => [
             'server_ssl_local_cert' => $pemFile,
@@ -56,14 +62,14 @@ $server = new Wrench\Server('wss://127.0.0.1:8000/', [
 /**
  * Our example application, that just echoes the received data.
  */
-$app = new class() implements Wrench\Application\DataHandlerInterface {
-    public function onData(string $data, Wrench\Connection $connection): void
+$app = new class implements DataHandlerInterface {
+    public function onData(string $data, Connection $connection): void
     {
         $connection->send($data);
     }
 };
 
 $server->registerApplication('echo', $app);
-$server->registerApplication('status', new Wrench\Application\StatusApplication());
+$server->registerApplication('status', new StatusApplication());
 
 $server->run();

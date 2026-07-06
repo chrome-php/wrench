@@ -62,9 +62,6 @@ class ConnectionTest extends BaseTest
         $connection->close($code);
     }
 
-    /**
-     * @return \PHPUnit_Framework_MockObject_MockObject&ServerClientSocket
-     */
     private function getMockSocket(): ServerClientSocket
     {
         return $this->getMockBuilder(ServerClientSocket::class)
@@ -119,17 +116,11 @@ class ConnectionTest extends BaseTest
         return $connection;
     }
 
-    /**
-     * @return \PHPUnit_Framework_MockObject_MockObject&DataHandlerInterface
-     */
     private function getMockApplication(): DataHandlerInterface
     {
         return $this->createMock(DataHandlerInterface::class);
     }
 
-    /**
-     * @return \PHPUnit_Framework_MockObject_MockObject&ServerClientSocket
-     */
     private function getConnectedSocket(): ServerClientSocket
     {
         $socket = $this->getMockSocket();
@@ -161,9 +152,6 @@ class ConnectionTest extends BaseTest
         $connection->handshake($request);
     }
 
-    /**
-     * @return \PHPUnit_Framework_MockObject_MockObject&ServerClientSocket
-     */
     private function getNotConnectedSocket(): AbstractSocket
     {
         $socket = $this->getMockSocket();
@@ -223,9 +211,6 @@ class ConnectionTest extends BaseTest
             ->method('onData')
             ->will($this->returnValue(true));
 
-        /**
-         * @var $server Server|\PHPUnit_Framework_MockObject_MockObject
-         */
         $server = $this->createMock(Server::class);
         $server->registerApplication($path, $application);
 

@@ -15,14 +15,14 @@ abstract class Frame
      *
      * @var int|null
      */
-    protected $length = null;
+    protected $length;
 
     /**
      * The type of this payload.
      *
      * @var int|null
      */
-    protected $type = null;
+    protected $type;
 
     /**
      * The buffer.

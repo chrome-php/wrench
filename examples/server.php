@@ -1,6 +1,13 @@
 #!/usr/bin/env php
 <?php
 
+use Psr\Log\AbstractLogger;
+use Psr\Log\LoggerInterface;
+use Wrench\Application\DataHandlerInterface;
+use Wrench\Application\StatusApplication;
+use Wrench\Connection;
+use Wrench\Server;
+
 /**
  * Example server.
  *
@@ -22,7 +29,7 @@ require_once __DIR__.'/StatusApplication.php';
 /**
  * A simple PSR3 logger.
  */
-$logger = new class() extends Psr\Log\AbstractLogger implements Psr\Log\LoggerInterface {
+$logger = new class extends AbstractLogger implements LoggerInterface {
     public function log($level, $message, array $context = []): void
     {
         echo \sprintf('[%s] %s - %s', $level, $message, \json_encode($context)).\PHP_EOL;
@@ -32,7 +39,7 @@ $logger = new class() extends Psr\Log\AbstractLogger implements Psr\Log\LoggerIn
 /**
  * Our websocket server.
  */
-$server = new Wrench\Server('ws://localhost:8000/', [
+$server = new Server('ws://localhost:8000/', [
     // 'logger' => $logger,
     'allowed_origins' => [
         'mysite.localhost',
@@ -42,8 +49,8 @@ $server = new Wrench\Server('ws://localhost:8000/', [
 /**
  * Our example application, that just echoes the received data.
  */
-$app = new class() implements Wrench\Application\DataHandlerInterface {
-    public function onData(string $data, Wrench\Connection $connection): void
+$app = new class implements DataHandlerInterface {
+    public function onData(string $data, Connection $connection): void
     {
         $connection->send($data);
     }
@@ -51,5 +58,5 @@ $app = new class() implements Wrench\Application\DataHandlerInterface {
 
 $server->setLogger($logger);
 $server->registerApplication('echo', $app);
-$server->registerApplication('status', new Wrench\Application\StatusApplication());
+$server->registerApplication('status', new StatusApplication());
 $server->run();
