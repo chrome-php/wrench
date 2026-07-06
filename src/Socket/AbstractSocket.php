@@ -233,6 +233,10 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
      */
     public function waitForData(float $maxSeconds): ?bool
     {
+        if (null === $this->socket) {
+            return null;
+        }
+
         $read = [$this->socket];
         $write = null;
         $except = null;

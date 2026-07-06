@@ -302,6 +302,10 @@ class Client extends Configurable
      */
     public function waitForData(float $maxSeconds): ?bool
     {
+        if (!$this->isConnected()) {
+            return null;
+        }
+
         return $this->socket->waitForData($maxSeconds);
     }
 }

@@ -89,6 +89,7 @@ class ClientTest extends BaseTest
             $instance->addRequestHeader('X-Test', 'Custom Request Header');
 
             self::assertNull($instance->receive(), 'Receive before connect');
+            self::assertNull($instance->waitForData(0), 'Wait for data before connect');
 
             $success = $instance->connect();
             self::assertTrue($success, 'Client can connect to test server');
@@ -123,6 +124,7 @@ class ClientTest extends BaseTest
             $instance->disconnect();
 
             self::assertFalse($instance->isConnected());
+            self::assertNull($instance->waitForData(0), 'Wait for data after disconnect');
         } finally {
             $helper->tearDown();
         }
