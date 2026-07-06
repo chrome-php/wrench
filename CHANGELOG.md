@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## 1.9.2 (Unreleased)
+
+* Reject handshake request lines with a bare line feed ending or a non-literal HTTP version
+* Match `server_ssl_` socket option keys to the true end of input
+* Pass explicit trim characters ahead of the PHP 8.6 trim default change
+
+
 ## 1.9.1 (2026-07-06)
 
 * Fix `waitForData` crash when the socket is disconnected

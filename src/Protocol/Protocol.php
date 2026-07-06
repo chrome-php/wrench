@@ -120,7 +120,7 @@ abstract class Protocol
     /**
      * Used for parsing requested path. preg_* compatible.
      */
-    public const REQUEST_LINE_REGEX = '/^GET (\S+) HTTP\/1.1$/';
+    public const REQUEST_LINE_REGEX = '/^GET (\S+) HTTP\/1\.1$/D';
 
     /**
      * printf compatible.
@@ -459,9 +459,9 @@ abstract class Protocol
         $statusCode = $this->getStatusCode($response);
 
         if (self::HTTP_SWITCHING_PROTOCOLS !== $statusCode) {
-            $errorMessage = \explode("\n", \trim($this->getBody($response)), 2)[0];
+            $errorMessage = \explode("\n", \trim($this->getBody($response), " \n\r\t\0\x0B"), 2)[0];
 
-            throw new HandshakeException(\trim(\sprintf('Expected handshake response status code %d, but received %d. %s', self::HTTP_SWITCHING_PROTOCOLS, $statusCode, $errorMessage)));
+            throw new HandshakeException(\trim(\sprintf('Expected handshake response status code %d, but received %d. %s', self::HTTP_SWITCHING_PROTOCOLS, $statusCode, $errorMessage), " \n\r\t\0\x0B"));
         }
 
         $acceptHeaderValue = $this->getHeaders($response)[self::HEADER_ACCEPT] ?? '';
@@ -510,12 +510,12 @@ abstract class Protocol
             if (2 == \count($parts)) {
                 [$name, $value] = $parts;
                 if (!isset($return[$name])) {
-                    $return[$name] = \trim($value);
+                    $return[$name] = \trim($value, " \n\r\t\0\x0B");
                 } else {
                     if (\is_array($return[$name])) {
-                        $return[$name][] = \trim($value);
+                        $return[$name][] = \trim($value, " \n\r\t\0\x0B");
                     } else {
-                        $return[$name] = [$return[$name], \trim($value)];
+                        $return[$name] = [$return[$name], \trim($value, " \n\r\t\0\x0B")];
                     }
                 }
             }
@@ -608,7 +608,7 @@ abstract class Protocol
             throw new BadRequestException('No key header received');
         }
 
-        $key = \trim($headers[self::HEADER_KEY]);
+        $key = \trim($headers[self::HEADER_KEY], " \n\r\t\0\x0B");
 
         if (!$key) {
             throw new BadRequestException('Invalid key');
