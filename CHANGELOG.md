@@ -1,9 +1,8 @@
 # CHANGELOG
 
 
-## 1.9.0 (UPCOMING)
+## 1.9.0 (2026-07-06)
 
-* Prevent blocking empty `fread()`
 * Add an optional wait for data to `receive()`
 
 
