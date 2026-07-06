@@ -55,7 +55,7 @@ class Connection extends Configurable implements LoggerAwareInterface
      *
      * @var DataHandlerInterface|ConnectionHandlerInterface|UpdateHandlerInterface|null
      */
-    protected $application = null;
+    protected $application;
 
     /**
      * The IP address of the client.
@@ -77,7 +77,7 @@ class Connection extends Configurable implements LoggerAwareInterface
      *
      * @var array
      */
-    protected $headers = null;
+    protected $headers;
 
     /**
      * The array of query parameters included in the original request
@@ -85,14 +85,14 @@ class Connection extends Configurable implements LoggerAwareInterface
      *
      * @var array
      */
-    protected $queryParams = null;
+    protected $queryParams;
 
     /**
      * Connection ID.
      *
      * @var string|null
      */
-    protected $id = null;
+    protected $id;
 
     /**
      * @var PayloadHandler
@@ -148,7 +148,7 @@ class Connection extends Configurable implements LoggerAwareInterface
     /**
      * Gets the connection manager of this connection.
      *
-     * @return \Wrench\ConnectionManager
+     * @return ConnectionManager
      */
     public function getConnectionManager(): ConnectionManager
     {
@@ -192,11 +192,11 @@ class Connection extends Configurable implements LoggerAwareInterface
                 $this->logger->debug('Pong!');
                 break;
 
-            /**
-             * A Pong frame MAY be sent unsolicited.  This serves as a
-             * unidirectional heartbeat.  A response to an unsolicited Pong
-             * frame is not expected.
-             */
+                /**
+                 * A Pong frame MAY be sent unsolicited.  This serves as a
+                 * unidirectional heartbeat.  A response to an unsolicited Pong
+                 * frame is not expected.
+                 */
             case Protocol::TYPE_PONG:
                 $this->logger->info('Received unsolicited pong');
                 break;
@@ -294,6 +294,7 @@ class Connection extends Configurable implements LoggerAwareInterface
 
         if (!$payload->sendToSocket($this->socket)) {
             $this->logger->warning('Could not send payload to client');
+
             throw new ConnectionException('Could not send data to connection: '.$this->socket->getLastError());
         }
 
@@ -391,6 +392,7 @@ class Connection extends Configurable implements LoggerAwareInterface
                 'exception' => $e,
             ]);
             $this->close(Protocol::CLOSE_PROTOCOL_ERROR, (string) $e);
+
             throw $e;
         }
     }
@@ -467,7 +469,7 @@ class Connection extends Configurable implements LoggerAwareInterface
     /**
      * Gets the socket object.
      *
-     * @return Socket\ServerClientSocket
+     * @return ServerClientSocket
      */
     public function getSocket(): ServerClientSocket
     {

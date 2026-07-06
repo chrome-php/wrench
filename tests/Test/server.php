@@ -1,5 +1,9 @@
 <?php
 
+use Wrench\Application\DataHandlerInterface;
+use Wrench\Connection;
+use Wrench\Server;
+
 $loader = require __DIR__.'/../../vendor/autoload.php';
 
 if (2 != $argc || !$argv[1] || !\is_numeric($argv[1]) || (int) $argv[1] <= 1024) {
@@ -8,10 +12,10 @@ if (2 != $argc || !$argv[1] || !\is_numeric($argv[1]) || (int) $argv[1] <= 1024)
 
 $port = (int) $argv[1];
 
-$server = new Wrench\Server('ws://localhost:'.$port);
+$server = new Server('ws://localhost:'.$port);
 
-$app = new class() implements Wrench\Application\DataHandlerInterface {
-    public function onData(string $data, Wrench\Connection $connection): void
+$app = new class implements DataHandlerInterface {
+    public function onData(string $data, Connection $connection): void
     {
         $connection->send($data);
     }

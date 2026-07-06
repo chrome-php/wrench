@@ -1,0 +1,25 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Parameter \#1 \$obj of function spl_object_id expects object, resource given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/ConnectionManager.php
+
+		-
+			message: '#^PHPDoc tag @var with type string is not subtype of native type non\-empty\-string\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: src/Protocol/Protocol.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and array will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Protocol/Protocol.php
+
+		-
+			message: '#^Call to function is_callable\(\) with callable\(\)\: mixed will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Server.php

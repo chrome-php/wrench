@@ -27,7 +27,7 @@ abstract class ProtocolBaseTest extends BaseTest
             self::assertEquals('/chat', $path);
             self::assertEquals('http://example.com', $origin);
             self::assertEquals('dGhlIHNhbXBsZSBub25jZQ==', $key);
-            self::assertTrue(\is_array($extensions), 'Extensions returned as array');
+            self::assertIsArray($extensions, 'Extensions returned as array');
             self::assertEquals(['x-test', 'x-test2'], $extensions, 'Extensions match');
             self::assertEquals('chat, superchat', $protocol);
         } catch (Exception $e) {
@@ -42,7 +42,7 @@ abstract class ProtocolBaseTest extends BaseTest
     {
         try {
             $valid = self::getInstance()->validateResponseHandshake($response, $key);
-            self::assertTrue(\is_bool($valid), 'Validation return value is boolean');
+            self::assertIsBool($valid, 'Validation return value is boolean');
             self::assertTrue($valid, 'Handshake response validates');
         } catch (Exception $e) {
             $this->fail('Validated valid response handshake as invalid');
@@ -71,7 +71,7 @@ abstract class ProtocolBaseTest extends BaseTest
     public function testGetVersion(): void
     {
         $version = self::getInstance()->getVersion();
-        self::assertTrue(\is_int($version));
+        self::assertIsInt($version);
     }
 
     public function testGetResponseError(): void

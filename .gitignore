@@ -1,8 +1,10 @@
 /.claude
 /*.sw[m-p]
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
 /.phpunit.result.cache
 /composer.lock
 /phpstan.neon
 /phpunit.xml
-vendor
+vendor/
 examples/generated.pem

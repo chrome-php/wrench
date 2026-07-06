@@ -32,12 +32,12 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
     /**
      * @var resource|null
      */
-    protected $socket = null;
+    protected $socket;
 
     /**
      * Stream context.
      */
-    protected $context = null;
+    protected $context;
 
     /**
      * Whether the socket is connected to a server
@@ -59,7 +59,7 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
     /**
      * Gets the IP address of the socket.
      *
-     * @throws \Wrench\Exception\SocketException If the IP address cannot be obtained
+     * @throws SocketException If the IP address cannot be obtained
      *
      * @return string
      */
@@ -69,9 +69,9 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
 
         if ($name) {
             return self::getNamePart($name, self::NAME_PART_IP);
-        } else {
-            throw new SocketException('Cannot get socket IP address');
         }
+
+        throw new SocketException('Cannot get socket IP address');
     }
 
     /**
@@ -120,15 +120,15 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
             return \end($parts);
         } elseif (self::NAME_PART_IP == $part) {
             return \implode(':', \array_slice($parts, 0, -1));
-        } else {
-            throw new InvalidArgumentException('Invalid name part');
         }
+
+        throw new InvalidArgumentException('Invalid name part');
     }
 
     /**
      * Gets the port of the socket.
      *
-     * @throws \Wrench\Exception\SocketException If the port cannot be obtained
+     * @throws SocketException If the port cannot be obtained
      *
      * @return int
      */
@@ -138,9 +138,9 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
 
         if ($name) {
             return (int) self::getNamePart($name, self::NAME_PART_PORT);
-        } else {
-            throw new SocketException('Cannot get socket IP address');
         }
+
+        throw new SocketException('Cannot get socket IP address');
     }
 
     /**
@@ -160,9 +160,9 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
             }
 
             return $err;
-        } else {
-            return 'Not connected';
         }
+
+        return 'Not connected';
     }
 
     /**

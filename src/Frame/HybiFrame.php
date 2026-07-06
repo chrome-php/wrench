@@ -29,24 +29,24 @@ class HybiFrame extends Frame
      *
      * @var bool|null
      */
-    protected $masked = null;
+    protected $masked;
 
     /**
      * Masking key.
      *
      * @var string|null
      */
-    protected $mask = null;
+    protected $mask;
 
     /**
      * @var int|null
      */
-    protected $offset_payload = null;
+    protected $offset_payload;
 
     /**
      * @var int|null
      */
-    protected $offset_mask = null;
+    protected $offset_mask;
 
     /**
      * Encode a frame.

@@ -2,6 +2,7 @@
 
 namespace Wrench;
 
+use Exception;
 use InvalidArgumentException;
 use Wrench\Exception\FrameException;
 use Wrench\Exception\HandshakeException;
@@ -57,7 +58,7 @@ class Client extends Configurable
     /**
      * @var PayloadHandler|null
      */
-    protected $payloadHandler = null;
+    protected $payloadHandler;
 
     /**
      * Complete received payloads.
@@ -227,7 +228,7 @@ class Client extends Configurable
 
         try {
             $this->socket->connect();
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             return false;
         }
 

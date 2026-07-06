@@ -2,6 +2,7 @@
 
 namespace Wrench\Socket;
 
+use Exception;
 use InvalidArgumentException;
 use stdClass;
 use TypeError;
@@ -136,8 +137,9 @@ Sec-WebSocket-Version: 13\r\n\r\n");
 
             $response = $instance->receive();
             self::assertStringStartsWith('HTTP', $response, 'Response looks like HTTP handshake response');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $helper->tearDown();
+
             throw $e;
         }
 

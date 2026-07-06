@@ -5,6 +5,7 @@ namespace Wrench\Test;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
+use RuntimeException;
 
 /**
  * In conjunction with server.php, provides a listening server
@@ -17,10 +18,10 @@ final class ServerTestHelper implements LoggerAwareInterface
     public const TEST_SERVER_PORT_MIN = 16666;
     public const TEST_SERVER_PORT_MAX = 52222;
 
-    public static $nextPort = null;
+    public static $nextPort;
 
-    private $port = null;
-    private $process = null;
+    private $port;
+    private $process;
     private $pipes = [];
 
     public function __construct()
@@ -114,7 +115,7 @@ final class ServerTestHelper implements LoggerAwareInterface
             __DIR__.'/../'
         );
         if (false === $this->process) {
-            throw new \RuntimeException('proc_open failed: '.\var_export(\error_get_last(), true));
+            throw new RuntimeException('proc_open failed: '.\var_export(\error_get_last(), true));
         }
         \sleep(3);
     }
@@ -125,7 +126,7 @@ final class ServerTestHelper implements LoggerAwareInterface
     public static function getNextPort(): int
     {
         if (null === self::$nextPort) {
-            self::$nextPort = \mt_rand(self::TEST_SERVER_PORT_MIN, self::TEST_SERVER_PORT_MAX);
+            self::$nextPort = \random_int(self::TEST_SERVER_PORT_MIN, self::TEST_SERVER_PORT_MAX);
         }
 
         return self::$nextPort++;
