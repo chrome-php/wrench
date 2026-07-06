@@ -1,6 +1,11 @@
 # CHANGELOG
 
 
+## 1.9.1 (2026-07-06)
+
+* Fix `waitForData` crash when the socket is disconnected
+
+
 ## 1.9.0 (2026-07-06)
 
 * Add an optional wait for data to `receive()`
