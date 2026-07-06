@@ -62,4 +62,34 @@ class ServerClientSocketTest extends SocketBaseTest
 
         \fclose($remote);
     }
+
+    public function testReceiveWaitsForDataToArrive(): void
+    {
+        [$local, $remote] = \stream_socket_pair(\STREAM_PF_UNIX, \STREAM_SOCK_STREAM, \STREAM_IPPROTO_IP);
+        $instance = self::getInstance($local);
+
+        $start = \microtime(true);
+        $received = $instance->receive(AbstractSocket::DEFAULT_RECEIVE_LENGTH, 0.2);
+
+        self::assertSame('', $received);
+        self::assertGreaterThan(0.1, \microtime(true) - $start, 'receive waited for data to arrive');
+
+        \fclose($remote);
+    }
+
+    public function testReceiveDoesNotWaitWhenDataIsAvailable(): void
+    {
+        [$local, $remote] = \stream_socket_pair(\STREAM_PF_UNIX, \STREAM_SOCK_STREAM, \STREAM_IPPROTO_IP);
+        \fwrite($remote, 'foobar');
+
+        $instance = self::getInstance($local);
+
+        $start = \microtime(true);
+        $received = $instance->receive(AbstractSocket::DEFAULT_RECEIVE_LENGTH, 5.0);
+
+        self::assertSame('foobar', $received);
+        self::assertLessThan(2, \microtime(true) - $start, 'receive returned as soon as data was available');
+
+        \fclose($remote);
+    }
 }

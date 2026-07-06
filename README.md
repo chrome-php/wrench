@@ -58,7 +58,7 @@ $server->run();
 $client = new Client('ws://localhost:8000', 'http://localhost:8000');
 $client->connect();
 $client->sendData('hello');
-$response = $client->receive()[0]->getPayload();
+$response = $client->receive(5.0)[0]->getPayload();
 $client->disconnect();
 ```
 
