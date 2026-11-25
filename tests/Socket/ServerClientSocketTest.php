@@ -3,6 +3,7 @@
 namespace Wrench\Socket;
 
 use Wrench\Exception\SocketException;
+use Wrench\Test\SecureStreamHelper;
 
 class ServerClientSocketTest extends SocketBaseTest
 {
@@ -108,5 +109,63 @@ class ServerClientSocketTest extends SocketBaseTest
         self::assertLessThan(2, \microtime(true) - $start, 'receive returned as soon as data was available');
 
         \fclose($remote);
+    }
+
+    public function testReceiveDisconnectsWhenClosed(): void
+    {
+        [$local, $remote] = \stream_socket_pair(\STREAM_PF_UNIX, \STREAM_SOCK_STREAM, \STREAM_IPPROTO_IP);
+        $instance = self::getInstance($local);
+
+        \fclose($remote);
+
+        self::assertSame('', $instance->receive());
+        self::assertFalse($instance->isConnected());
+    }
+
+    public function testReceiveReturnsSecureDataAlreadyAvailable(): void
+    {
+        $helper = new SecureStreamHelper();
+        $helper->deliver($helper->encrypt('foobar'));
+
+        $instance = self::getInstance($helper->getClient());
+
+        $start = \microtime(true);
+        $received = $instance->receive();
+
+        self::assertSame('foobar', $received);
+        self::assertLessThan(2, \microtime(true) - $start, 'receive did not block on a secure socket');
+    }
+
+    public function testReceiveIgnoresIncompleteSecureRecord(): void
+    {
+        $helper = new SecureStreamHelper();
+        $bytes = $helper->encrypt('foobar');
+
+        $instance = self::getInstance($helper->getClient());
+
+        $helper->deliver(\substr($bytes, 0, 10));
+
+        self::assertSame('', $instance->receive());
+        self::assertTrue($instance->isConnected());
+
+        $helper->deliver(\substr($bytes, 10));
+
+        self::assertSame('foobar', $instance->receive());
+    }
+
+    public function testReceiveWaitsPastIncompleteSecureRecord(): void
+    {
+        $helper = new SecureStreamHelper();
+        $bytes = $helper->encrypt('foobar');
+
+        $instance = self::getInstance($helper->getClient());
+
+        $helper->deliver(\substr($bytes, 0, 10));
+
+        $start = \microtime(true);
+        $received = $instance->receive(AbstractSocket::DEFAULT_RECEIVE_LENGTH, 0.2);
+
+        self::assertSame('', $received);
+        self::assertGreaterThan(0.1, \microtime(true) - $start, 'receive kept waiting for the rest of the record');
     }
 }

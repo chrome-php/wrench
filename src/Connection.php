@@ -311,6 +311,11 @@ class Connection extends Configurable implements LoggerAwareInterface
         $data = $this->socket->receive();
 
         if ('' === $data) {
+            // a readable socket does not always hold application data
+            if ($this->socket->isConnected()) {
+                return;
+            }
+
             throw new CloseException('Error reading data from socket: '.$this->socket->getLastError());
         }
 
