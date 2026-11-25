@@ -1,6 +1,18 @@
 # CHANGELOG
 
 
+## 1.9.3 (2026-11-25)
+
+* Fix failed connections and stalled reads on secure connections
+* Fix handshakes whose response arrives in more than one read
+* Fix frames received together with the handshake response being lost
+* Fix the server closing connections when a read returns no data
+* Fix accepting secure connections on PHP 8
+* Fix `getLastError` throwing on PHP 8
+* Fix payloads of `"0"` being dropped
+* Add support for PHP 8.6
+
+
 ## 1.9.2 (2026-07-06)
 
 * Reject handshake request lines with a bare line feed ending or a non-literal HTTP version
