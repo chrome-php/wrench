@@ -4,6 +4,7 @@ namespace Wrench;
 
 use PHPUnit\Framework\ExpectationFailedException;
 use Wrench\Application\DataHandlerInterface;
+use Wrench\Exception\CloseException;
 use Wrench\Exception\HandshakeException;
 use Wrench\Protocol\Protocol;
 use Wrench\Socket\AbstractSocket;
@@ -60,6 +61,44 @@ class ConnectionTest extends BaseTest
 
         $connection = self::getInstance($manager, $socket);
         $connection->close($code);
+    }
+
+    /**
+     * @doesNotPerformAssertions
+     */
+    public function testProcessWithoutData(): void
+    {
+        $socket = $this->getMockBuilder(ServerClientSocket::class)
+            ->onlyMethods(['getIp', 'getPort', 'isConnected', 'receive'])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $socket->method('getIp')->willReturn('127.0.0.1');
+        $socket->method('getPort')->willReturn(\random_int(1025, 50000));
+        $socket->method('isConnected')->willReturn(true);
+        $socket->method('receive')->willReturn('');
+
+        $connection = self::getInstance($this->getMockConnectionManager(), $socket);
+        $connection->process();
+    }
+
+    public function testProcessClosedSocket(): void
+    {
+        $socket = $this->getMockBuilder(ServerClientSocket::class)
+            ->onlyMethods(['getIp', 'getPort', 'isConnected', 'receive'])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $socket->method('getIp')->willReturn('127.0.0.1');
+        $socket->method('getPort')->willReturn(\random_int(1025, 50000));
+        $socket->method('isConnected')->willReturn(false);
+        $socket->method('receive')->willReturn('');
+
+        $connection = self::getInstance($this->getMockConnectionManager(), $socket);
+
+        $this->expectException(CloseException::class);
+
+        $connection->process();
     }
 
     private function getMockSocket(): ServerClientSocket

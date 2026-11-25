@@ -199,11 +199,8 @@ class Client extends Configurable
             return null;
         }
 
-        $data = $this->socket->receive(AbstractSocket::DEFAULT_RECEIVE_LENGTH, $waitSeconds);
-
-        if (!$data) {
-            return [];
-        }
+        // payloads that arrived with the handshake response are returned without waiting
+        $data = $this->socket->receive(AbstractSocket::DEFAULT_RECEIVE_LENGTH, [] === $this->received ? $waitSeconds : 0.0);
 
         $this->payloadHandler->handle($data);
         $received = $this->received;
@@ -232,6 +229,8 @@ class Client extends Configurable
             return false;
         }
 
+        $this->received = [];
+
         $key = $this->protocol->generateKey();
         $handshake = $this->protocol->getRequestHandshake(
             $this->uri,
@@ -242,11 +241,26 @@ class Client extends Configurable
 
         $this->socket->send($handshake);
 
-        // wait for the response to arrive, since receive() does not block waiting for data
-        $response = $this->socket->receive(self::MAX_HANDSHAKE_RESPONSE, ClientSocket::TIMEOUT_SOCKET);
+        $response = '';
+        $deadline = \hrtime(true) + ClientSocket::TIMEOUT_SOCKET * 1000000000;
 
-        return $this->connected =
-            $this->protocol->validateResponseHandshake($response, $key);
+        do {
+            $response .= $this->socket->receive(AbstractSocket::DEFAULT_RECEIVE_LENGTH, \max(0, $deadline - \hrtime(true)) / 1e9);
+            $end = \strpos($response, "\r\n\r\n");
+        } while (false === $end
+            && \strlen($response) < self::MAX_HANDSHAKE_RESPONSE
+            && \hrtime(true) < $deadline
+            && $this->socket->isConnected()
+        );
+
+        $this->connected = $this->protocol->validateResponseHandshake($response, $key);
+
+        // frames may arrive in the same read as the response
+        if ($this->connected && false !== $end) {
+            $this->payloadHandler->handle(\substr($response, $end + 4));
+        }
+
+        return $this->connected;
     }
 
     /**
@@ -304,6 +318,10 @@ class Client extends Configurable
     {
         if (!$this->isConnected()) {
             return null;
+        }
+
+        if ([] !== $this->received) {
+            return true;
         }
 
         return $this->socket->waitForData($maxSeconds);

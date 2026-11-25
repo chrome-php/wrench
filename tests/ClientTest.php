@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use TypeError;
 use Wrench\Payload\Payload;
 use Wrench\Protocol\Protocol;
+use Wrench\Protocol\Rfc6455Protocol;
 use Wrench\Socket\ClientSocket;
 use Wrench\Test\BaseTest;
 use Wrench\Test\ServerTestHelper;
@@ -43,6 +44,44 @@ class ClientTest extends BaseTest
             ->getMock();
     }
 
+    /**
+     * Gets a client whose socket answers the handshake with the chunks the
+     * callback makes out of the response.
+     */
+    private function getInstanceWithResponse(callable $chunk): Client
+    {
+        $socket = $this->getMockBuilder(ClientSocket::class)
+            ->onlyMethods(['connect', 'isConnected', 'send', 'receive'])
+            ->setConstructorArgs(['ws://localhost:8000'])
+            ->getMock();
+
+        $chunks = [];
+
+        $socket->method('connect')->willReturn(true);
+        $socket->method('isConnected')->willReturn(true);
+        $socket->method('send')->willReturnCallback(static function (string $data) use (&$chunks, $chunk): int {
+            if (\preg_match('/Sec-WebSocket-Key: (.*)\r\n/i', $data, $matches)) {
+                $chunks = $chunk(\sprintf(
+                    "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: %s\r\n\r\n",
+                    (new Rfc6455Protocol())->getEncodedHash($matches[1])
+                ));
+            }
+
+            return \strlen($data);
+        });
+        $socket->method('receive')->willReturnCallback(static function () use (&$chunks): string {
+            return (string) \array_shift($chunks);
+        });
+
+        $instance = self::getInstance('ws://localhost/test', 'http://example.org/');
+
+        (function () use ($socket): void {
+            $this->socket = $socket;
+        })->call($instance);
+
+        return $instance;
+    }
+
     public function testConstructorUriInvalid(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -76,6 +115,46 @@ class ClientTest extends BaseTest
         $this->expectException(InvalidArgumentException::class);
 
         new Client('ws://localhost:8000', 'NOTAVALIDURI');
+    }
+
+    public function testConnectWithResponseInParts(): void
+    {
+        $instance = $this->getInstanceWithResponse(static function (string $response): array {
+            return ['', \substr($response, 0, 40), \substr($response, 40)];
+        });
+
+        self::assertTrue($instance->connect());
+        self::assertSame([], $instance->receive());
+    }
+
+    public function testConnectWithPayloadAfterResponse(): void
+    {
+        $instance = $this->getInstanceWithResponse(static function (string $response): array {
+            return [$response."\x81\x06foobar"];
+        });
+
+        self::assertTrue($instance->connect());
+        self::assertTrue($instance->waitForData(0));
+
+        $responses = $instance->receive();
+        self::assertCount(1, $responses);
+        self::assertSame('foobar', $responses[0]->getPayload());
+    }
+
+    public function testConnectDiscardsPayloadsOfPreviousConnection(): void
+    {
+        $payloads = ['foo', 'bar'];
+        $instance = $this->getInstanceWithResponse(static function (string $response) use (&$payloads): array {
+            return [$response."\x81\x03".\array_shift($payloads)];
+        });
+
+        self::assertTrue($instance->connect());
+        self::assertTrue($instance->disconnect());
+        self::assertTrue($instance->connect());
+
+        $responses = $instance->receive();
+        self::assertCount(1, $responses);
+        self::assertSame('bar', $responses[0]->getPayload());
     }
 
     public function testSend(): void

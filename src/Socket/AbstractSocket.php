@@ -26,6 +26,8 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
 
     public const DEFAULT_RECEIVE_LENGTH = 1400;
 
+    private const MAX_RECEIVE_LENGTH = 65536;
+
     public const NAME_PART_IP = 0;
     public const NAME_PART_PORT = 1;
 
@@ -257,97 +259,62 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
      */
     public function receive(int $length = self::DEFAULT_RECEIVE_LENGTH, float $waitSeconds = 0.0): string
     {
-        if ($waitSeconds > 0) {
-            $this->waitForData($waitSeconds);
+        $deadline = \hrtime(true) + $waitSeconds * 1e9;
+
+        do {
+            $buffer = $this->drain($length);
+
+            if ('' !== $buffer || !$this->socket) {
+                return $buffer;
+            }
+
+            // a readable socket does not always hold application data, since an
+            // encrypted stream also carries records that the TLS layer consumes
+            $remaining = ($deadline - \hrtime(true)) / 1e9;
+        } while ($remaining > 0 && true === $this->waitForData($remaining));
+
+        return '';
+    }
+
+    /**
+     * Reads the data that has already arrived, without blocking.
+     */
+    private function drain(int $length): string
+    {
+        if (!$this->socket) {
+            return '';
         }
 
         $buffer = '';
-        $metadata['unread_bytes'] = 0;
-        $makeBlockingAfterRead = false;
+
+        // blocking reads and end of file checks cannot be bounded reliably
+        // on an encrypted stream, where older PHP versions wait for more data
+        \stream_set_blocking($this->socket, false);
 
         try {
             do {
-                // feof means socket has been closed
-                // also, sometimes in long running processes the system seems to kill the underlying socket
-                if (!$this->socket || \feof($this->socket)) {
-                    $this->disconnect();
+                $result = \fread($this->socket, $length);
 
-                    return $buffer;
-                }
-                // poll before reading so that an empty socket returns immediately instead
-                // of blocking until the socket timeout; callers that expect a reply must
-                // wait for data to arrive before reading, as the handshake does
-                $readArray = [$this->socket];
-                $writeArray = null;
-                $exceptArray = null;
-                $selectResult = \stream_select($readArray, $writeArray, $exceptArray, 0);
-                // 1 means there is data to read, false means we were unable to check if there is data to read
-                if (1 === $selectResult || false === $selectResult) {
-                    $result = \fread($this->socket, $length);
-                } else {
-                    $result = false;
-                }
-
-                if ($makeBlockingAfterRead) {
-                    \stream_set_blocking($this->socket, true);
-                    $makeBlockingAfterRead = false;
-                }
-
-                if (false === $result) {
-                    return $buffer;
+                if (false === $result || '' === $result) {
+                    break;
                 }
 
                 $buffer .= $result;
 
-                // feof means socket has been closed
-                if (\feof($this->socket)) {
-                    $this->disconnect();
+                // an unbuffered stream gives one read of the length asked for
+                $buffered = \stream_get_meta_data($this->socket)['unread_bytes'] > 0;
+            } while ($buffered && \strlen($buffer) < self::MAX_RECEIVE_LENGTH);
 
-                    return $buffer;
-                }
-
-                $continue = false;
-
-                if (1 === \strlen($result)) {
-                    // Workaround Chrome behavior (still needed?)
-                    $continue = true;
-                }
-
-                if (\strlen($result) === $length) {
-                    $continue = true;
-                }
-
-                // Continue if more data to be read
-                $metadata = \stream_get_meta_data($this->socket);
-
-                /** @phpstan-ignore-next-line */
-                if (isset($metadata['unread_bytes'])) {
-                    if (!$metadata['unread_bytes']) {
-                        // stop it, if we read a full message in previous time
-                        $continue = false;
-                    } else {
-                        $continue = true;
-                        // it makes sense only if unread_bytes less than DEFAULT_RECEIVE_LENGTH
-                        if ($length > $metadata['unread_bytes']) {
-                            // http://php.net/manual/en/function.stream-get-meta-data.php
-                            // 'unread_bytes' don't describes real length correctly.
-                            // $length = $metadata['unread_bytes'];
-
-                            // Socket is a blocking by default. When we do a blocking read from an empty
-                            // queue it will block and the server will hang. https://bugs.php.net/bug.php?id=1739
-                            \stream_set_blocking($this->socket, false);
-                            $makeBlockingAfterRead = true;
-                        }
-                    }
-                }
-            } while ($continue);
-
-            return $buffer;
+            $closed = '' === $buffer && \feof($this->socket);
         } finally {
-            if ($this->socket && !\feof($this->socket) && $makeBlockingAfterRead) {
-                \stream_set_blocking($this->socket, true);
-            }
+            \stream_set_blocking($this->socket, true);
         }
+
+        if ($closed) {
+            $this->disconnect();
+        }
+
+        return $buffer;
     }
 
     /**
