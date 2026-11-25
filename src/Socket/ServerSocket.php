@@ -61,8 +61,6 @@ class ServerSocket extends UriSocket
             throw new ConnectionException(\socket_strerror(\socket_last_error()));
         }
 
-        \socket_set_option(\socket_import_stream($new), \SOL_TCP, \TCP_NODELAY, 1);
-
         return $new;
     }
 
@@ -93,7 +91,7 @@ class ServerSocket extends UriSocket
 
     protected function getSocketStreamContextOptions(): array
     {
-        $options = [];
+        $options = ['tcp_nodelay' => true];
 
         if ($this->options['backlog']) {
             $options['backlog'] = $this->options['backlog'];
