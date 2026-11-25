@@ -141,6 +141,22 @@ class ClientTest extends BaseTest
         self::assertSame('foobar', $responses[0]->getPayload());
     }
 
+    public function testConnectDiscardsPayloadsOfPreviousConnection(): void
+    {
+        $payloads = ['foo', 'bar'];
+        $instance = $this->getInstanceWithResponse(static function (string $response) use (&$payloads): array {
+            return [$response."\x81\x03".\array_shift($payloads)];
+        });
+
+        self::assertTrue($instance->connect());
+        self::assertTrue($instance->disconnect());
+        self::assertTrue($instance->connect());
+
+        $responses = $instance->receive();
+        self::assertCount(1, $responses);
+        self::assertSame('bar', $responses[0]->getPayload());
+    }
+
     public function testSend(): void
     {
         try {

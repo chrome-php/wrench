@@ -26,7 +26,7 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
 
     public const DEFAULT_RECEIVE_LENGTH = 1400;
 
-    private const MAX_RECEIVE_LENGTH = 1048576;
+    private const MAX_RECEIVE_LENGTH = 65536;
 
     public const NAME_PART_IP = 0;
     public const NAME_PART_PORT = 1;
@@ -259,7 +259,7 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
      */
     public function receive(int $length = self::DEFAULT_RECEIVE_LENGTH, float $waitSeconds = 0.0): string
     {
-        $deadline = \hrtime(true) + (int) ($waitSeconds * 1e9);
+        $deadline = \hrtime(true) + $waitSeconds * 1e9;
 
         do {
             $buffer = $this->drain($length);
@@ -300,7 +300,10 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
                 }
 
                 $buffer .= $result;
-            } while (\strlen($buffer) < self::MAX_RECEIVE_LENGTH);
+
+                // an unbuffered stream gives one read of the length asked for
+                $buffered = \stream_get_meta_data($this->socket)['unread_bytes'] > 0;
+            } while ($buffered && \strlen($buffer) < self::MAX_RECEIVE_LENGTH);
 
             $closed = '' === $buffer && \feof($this->socket);
         } finally {

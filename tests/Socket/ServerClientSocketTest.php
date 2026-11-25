@@ -81,6 +81,20 @@ class ServerClientSocketTest extends SocketBaseTest
         \fclose($remote);
     }
 
+    public function testReceiveReadsOnceFromUnbufferedSocket(): void
+    {
+        [$local, $remote] = \stream_socket_pair(\STREAM_PF_UNIX, \STREAM_SOCK_STREAM, \STREAM_IPPROTO_IP);
+        \stream_set_read_buffer($local, 0);
+        \fwrite($remote, \str_repeat('a', 2 * AbstractSocket::DEFAULT_RECEIVE_LENGTH));
+
+        $instance = self::getInstance($local);
+
+        self::assertSame(AbstractSocket::DEFAULT_RECEIVE_LENGTH, \strlen($instance->receive()));
+        self::assertSame(AbstractSocket::DEFAULT_RECEIVE_LENGTH, \strlen($instance->receive()));
+
+        \fclose($remote);
+    }
+
     public function testReceiveWaitsForDataToArrive(): void
     {
         [$local, $remote] = \stream_socket_pair(\STREAM_PF_UNIX, \STREAM_SOCK_STREAM, \STREAM_IPPROTO_IP);
@@ -165,7 +179,10 @@ class ServerClientSocketTest extends SocketBaseTest
         $start = \microtime(true);
         $received = $instance->receive(AbstractSocket::DEFAULT_RECEIVE_LENGTH, 0.2);
 
+        $elapsed = \microtime(true) - $start;
+
         self::assertSame('', $received);
-        self::assertGreaterThan(0.1, \microtime(true) - $start, 'receive kept waiting for the rest of the record');
+        self::assertGreaterThan(0.1, $elapsed, 'receive kept waiting for the rest of the record');
+        self::assertLessThan(2, $elapsed, 'receive stopped waiting when the time ran out');
     }
 }

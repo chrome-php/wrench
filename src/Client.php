@@ -229,6 +229,8 @@ class Client extends Configurable
             return false;
         }
 
+        $this->received = [];
+
         $key = $this->protocol->generateKey();
         $handshake = $this->protocol->getRequestHandshake(
             $this->uri,
