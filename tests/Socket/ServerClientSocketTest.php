@@ -36,6 +36,23 @@ class ServerClientSocketTest extends SocketBaseTest
         $instance->getPort();
     }
 
+    public function testGetLastErrorTooSoon(): void
+    {
+        $instance = self::getInstance(null);
+
+        self::assertSame('Not connected', $instance->getLastError());
+    }
+
+    public function testGetLastError(): void
+    {
+        [$local, $remote] = \stream_socket_pair(\STREAM_PF_UNIX, \STREAM_SOCK_STREAM, \STREAM_IPPROTO_IP);
+        $instance = self::getInstance($local);
+
+        self::assertSame('Unknown error', $instance->getLastError());
+
+        \fclose($remote);
+    }
+
     public function testReceiveReturnsImmediatelyWhenNoDataIsAvailable(): void
     {
         [$local, $remote] = \stream_socket_pair(\STREAM_PF_UNIX, \STREAM_SOCK_STREAM, \STREAM_IPPROTO_IP);
