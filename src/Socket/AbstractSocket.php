@@ -151,15 +151,7 @@ abstract class AbstractSocket extends Configurable implements ResourceInterface
     public function getLastError(): string
     {
         if ($this->isConnected() && $this->socket) {
-            $err = @\socket_last_error($this->socket);
-            if ($err) {
-                $err = \socket_strerror($err);
-            }
-            if (!$err) {
-                $err = 'Unknown error';
-            }
-
-            return $err;
+            return 'Unknown error';
         }
 
         return 'Not connected';
