@@ -138,7 +138,7 @@ abstract class Payload
     {
         $chunkSize = null;
 
-        while ($data) {
+        while ('' !== $data) {
             $frame = $this->getReceivingFrame();
 
             $remaining = $frame->getRemainingData();

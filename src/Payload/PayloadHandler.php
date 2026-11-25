@@ -49,7 +49,7 @@ class PayloadHandler extends Configurable
             $this->payload = $this->protocol->getPayload();
         }
 
-        while ($data) { // Each iteration pulls off a single payload chunk
+        while ('' !== $data) { // Each iteration pulls off a single payload chunk
             $size = \strlen($data);
             $remaining = $this->payload->getRemainingData();
 
