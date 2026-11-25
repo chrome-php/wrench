@@ -17,10 +17,30 @@ class ServerSocketTest extends UriSocketBaseTest
         $accepted = $instance->accept();
 
         self::assertIsResource($accepted);
-        self::assertNotSame(0, \socket_get_option(\socket_import_stream($accepted), \SOL_TCP, \TCP_NODELAY), 'Nagle algorithm is disabled');
+        self::assertGreaterThan(0, \socket_get_option(\socket_import_stream($accepted), \SOL_TCP, \TCP_NODELAY), 'Nagle algorithm is disabled');
 
         \fclose($client);
         \fclose($accepted);
+        $instance->disconnect();
+    }
+
+    public function testAcceptReadsUnbuffered(): void
+    {
+        $port = ServerTestHelper::getNextPort();
+        $instance = self::getInstance('ws://localhost:'.$port);
+        $instance->listen();
+
+        $client = \stream_socket_client('tcp://localhost:'.$port);
+        $accepted = new ServerClientSocket($instance->accept());
+
+        \fwrite($client, \str_repeat('a', 2 * AbstractSocket::DEFAULT_RECEIVE_LENGTH));
+
+        self::assertTrue($accepted->waitForData(AbstractSocket::TIMEOUT_SOCKET));
+        self::assertSame(AbstractSocket::DEFAULT_RECEIVE_LENGTH, \strlen($accepted->receive()));
+        self::assertSame(AbstractSocket::DEFAULT_RECEIVE_LENGTH, \strlen($accepted->receive()));
+
+        \fclose($client);
+        $accepted->disconnect();
         $instance->disconnect();
     }
 
@@ -35,7 +55,7 @@ class ServerSocketTest extends UriSocketBaseTest
 
         // the TLS handshake needs both ends to run at once, so the client is another process
         $client = \proc_open(
-            [\PHP_BINARY, '-r', \sprintf('$c = stream_context_create(["ssl" => ["verify_peer" => false, "verify_peer_name" => false]]); stream_socket_client("ssl://localhost:%d", $n, $s, 5, STREAM_CLIENT_CONNECT, $c); usleep(500000);', $port)],
+            [\PHP_BINARY, '-r', \sprintf('$c = stream_context_create(["ssl" => ["verify_peer" => false, "verify_peer_name" => false]]); stream_socket_client("ssl://localhost:%d", $n, $s, 5, STREAM_CLIENT_CONNECT, $c);', $port)],
             [],
             $pipes
         );

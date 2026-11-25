@@ -61,6 +61,9 @@ class ServerSocket extends UriSocket
             throw new ConnectionException(\socket_strerror(\socket_last_error()));
         }
 
+        // each read is then bounded by the length asked for, which listeners count on
+        \stream_set_read_buffer($new, 0);
+
         return $new;
     }
 
